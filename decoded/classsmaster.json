@@ -1,0 +1,324 @@
+[
+    {
+        "id": 1,
+        "className": "Class 1",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 2,
+        "className": "Class 2",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 4,
+        "className": "Class 3",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 5,
+        "className": "Class 4",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 6,
+        "className": "Class 5",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 7,
+        "className": "Class 6",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 8,
+        "className": "Class 7",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 9,
+        "className": "Class 8",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 10,
+        "className": "Class 9",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 11,
+        "className": "Class 10",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 12,
+        "className": "Class 11",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 13,
+        "className": "Class 12",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 14,
+        "className": "ધોરણ ૧",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 15,
+        "className": "ધોરણ ૨",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 16,
+        "className": "ધોરણ ૩",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 17,
+        "className": "ધોરણ ૪",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 18,
+        "className": "ધોરણ ૫",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 19,
+        "className": "ધોરણ ૬",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 20,
+        "className": "ધોરણ ૭",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 21,
+        "className": "ધોરણ ૮",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 22,
+        "className": "ધોરણ ૯",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 23,
+        "className": "ધોરણ ૧૦",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 24,
+        "className": "ધોરણ ૧૧ (વિજ્ઞાન પ્રવાહ)",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 25,
+        "className": "ધોરણ ૧૨ (વિજ્ઞાન પ્રવાહ)",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 26,
+        "className": "Class 1",
+        "board": "gseb",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 27,
+        "className": "Class 2",
+        "board": "gseb",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 28,
+        "className": "Class 3",
+        "board": "gseb",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 29,
+        "className": "Class 4",
+        "board": "gseb",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 30,
+        "className": "Class 5",
+        "board": "gseb",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 31,
+        "className": "Class 6",
+        "board": "gseb",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 32,
+        "className": "Class 7",
+        "board": "gseb",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 33,
+        "className": "Class 8",
+        "board": "gseb",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 34,
+        "className": "Class 9",
+        "board": "gseb",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 35,
+        "className": "Class 10",
+        "board": "gseb",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 36,
+        "className": "Class 11",
+        "board": "gseb",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 37,
+        "className": "Class 12",
+        "board": "gseb",
+        "language": "en",
+        "isVisible": 1
+    },
+    {
+        "id": 38,
+        "className": "ધોરણ ૧૧ (વાણિજ્ય પ્રવાહ)",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 39,
+        "className": "ધોરણ ૧૨ (વાણિજ્ય પ્રવાહ)",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 41,
+        "className": "ધોરણ ૧૧ (આર્ટ્સ)",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 0
+    },
+    {
+        "id": 42,
+        "className": "ધોરણ ૧૨ (આર્ટ્સ)",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 0
+    },
+    {
+        "id": 43,
+        "className": "નર્સરી",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 44,
+        "className": "જુ. કે. જી ",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 45,
+        "className": "સિ. કે. જી ",
+        "board": "gseb",
+        "language": "gu",
+        "isVisible": 1
+    },
+    {
+        "id": 46,
+        "className": "Play group",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 0
+    },
+    {
+        "id": 47,
+        "className": "LKG",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 0
+    },
+    {
+        "id": 48,
+        "className": "UKG",
+        "board": "cbse",
+        "language": "en",
+        "isVisible": 0
+    }
+]
