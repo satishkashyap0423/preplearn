@@ -25,4 +25,4 @@ export const FetchInstance = async(method, body, apiname) => {
     } 
 }
 
-//export const BASE_URL = "https://sagc.in/aswini/gpac/"
+export const BASE_URL = "https://sagclapp.com/gpac/prepvideos/"

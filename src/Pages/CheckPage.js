@@ -7,7 +7,7 @@ export default function CheckPage({history}) {
         let teacherDetails = JSON.parse(localStorage.getItem("userDetail"));
         if(teacherDetails!=null && teacherDetails!=undefined){
             setTimeout(() => {
-            history.push("/HomePage")
+            history.push("/OnlineHomePage")
                 
             }, 2000);
         }

@@ -350,7 +350,7 @@ export default function LoginPage({ history }) {
           return false
         }
 
-        if (data.data.systemstatus === 0 || data.data.systemstatus === '0') {
+        if (data.data.systemstatus === 1 || data.data.systemstatus === '1') {
           // open and save drive path on localstorage
           if (data.data.appversion === packageJson.version) {
             setuserDetail(data.data)
@@ -471,7 +471,8 @@ export default function LoginPage({ history }) {
       localStorage.setItem("AllTopics", JSON.stringify(getTopics.data));
       localStorage.setItem("AllVideos", JSON.stringify(getVideos.data));
       setloading(false)
-      history.push('/HomePage')
+      // history.push('/HomePage')
+      history.push('/OnlineHomePage')
     }
     else {
       userDetail["drivePath"] = `${driveinfo.Drive}/preplearn`;
@@ -487,7 +488,8 @@ export default function LoginPage({ history }) {
       localStorage.setItem("AllTopics", JSON.stringify(getTopics.data));
       localStorage.setItem("AllVideos", JSON.stringify(getVideos.data));
       setloading(false)
-      history.push('/HomePage')
+      // history.push('/HomePage')
+      history.push('/OnlineHomePage')
     }
 
   }
