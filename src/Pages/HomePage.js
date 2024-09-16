@@ -314,11 +314,14 @@ function HomePage({ history }) {
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-
-        const userCourseIds = userData.courseid.toString().split(",").map(id => id.trim());
-        const userLevelIds = userData.levelid.toString().split(",").map(id => id.trim());
-        const userBatchIds = userData.batchid.toString().split(",").map(id => id.trim());
-        console.log(userBatchIds)
+        setVideosArray([]);
+        setTopicsArray([]);
+        setBatchesArray([]);
+        setLevelArray([]);
+        setcourseArray([])
+        const userCourseIds = await userData.courseid.toString().split(",").map(id => id.trim());
+        const userLevelIds = await userData.levelid.toString().split(",").map(id => id.trim());
+        const userBatchIds = await userData.batchid.toString().split(",").map(id => id.trim());
         // Filter master_courses based on the course IDs in userData
         const filterCourseData = local_master_courses.filter(objA =>
           userCourseIds.includes(objA.courseid.toString())
@@ -384,10 +387,6 @@ function HomePage({ history }) {
     fetchData();
 
   }, []);
-
-  useEffect(() => {
-
-  }, [VideosArray]);
 
   const mergeArrays = (arr1, arr2) => {
     // Create a map from the first array to allow quick lookups

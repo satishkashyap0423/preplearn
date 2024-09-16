@@ -46,6 +46,8 @@
     "request-progress": "^3.0.0",
     "sass": " ~1.32.6",
     "serial-number": "^1.3.0",
+    "shaka-player": "^4.11.2",
+    "shaka-player-react": "1.1.2",
     "video-react": "^0.16.0",
     "vue-cli-plugin-electron-builder": "^2.1.1",
     "web-vitals": "^2.1.4"

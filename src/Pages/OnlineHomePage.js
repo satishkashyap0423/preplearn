@@ -294,7 +294,7 @@ function OnlineHomePage({ history }) {
   const handleLevelChange = (event) => {
     setselectedLevel(event.target.value);
     const filterData = local_master_batches.filter(batch => batch.courseid.toString() === event.target.value.courseid.toString() && batch.levelid.toString() === event.target.value.levelid.toString());
-;
+    ;
     setBatchesArray(filterData)
     // setSelectedChatper(filterData[0])
   }
@@ -333,8 +333,9 @@ function OnlineHomePage({ history }) {
       try {
         // get user course and user level
         let courseArray = [];
-        let c1 = userData.courseid.toString().split(",");
-        let c2 = userData.coursename.toString().split(",");
+        console.log(userData)
+        let c1 = userData?.courseid.toString().split(",");
+        let c2 = userData?.coursename.toString().split(",");
         if (c1.length === c2.length) {
           courseArray = await c1.map((id, index) => ({
             id: id,
@@ -433,38 +434,34 @@ function OnlineHomePage({ history }) {
         windows.webContents.session.clearCache();
         windows.close()
       }
-      else {
-        toast("Please Check your Internet")
-      }
-
     })
 
   }
 
-  const PlayVideo = async(video, index) => {
-    let bodydata={
+  const PlayVideo = async (video, index) => {
+    let bodydata = {
       userid: userData.userid,
-      videoid:video.id,
-      batchid:selectedBatch.batchid,
-      mode:'online',
-      currenttime:video.currenttime?video.currenttime:0,
-      duration:duration,
-      counts:video.watchcount===null?1:video.watchcount+1
+      videoid: video.id,
+      batchid: selectedBatch.batchid,
+      mode: 'online',
+      currenttime: video.currenttime ? video.currenttime : 0,
+      duration: duration,
+      counts: video.watchcount === null ? 1 : video.watchcount + 1
     }
-    await FetchInstance("POST", bodydata, "Analysis_Access").then((data)=>{
-        const videos = VideosArray.find(item => item.id === video.id);
-        if (videos) {
-          videos.watchcount = video.watchcount===null?1:video.watchcount+1;
-        }
-        setselectedVideo(video)
-        // if(player){
-        //   player.getMediaElement().currentTime = videos.currenttime;
+    await FetchInstance("POST", bodydata, "Analysis_Access").then((data) => {
+      const videos = VideosArray.find(item => item.id === video.id);
+      if (videos) {
+        videos.watchcount = video.watchcount === null ? 1 : video.watchcount + 1;
+      }
+      setselectedVideo(video)
+      // if(player){
+      //   player.getMediaElement().currentTime = videos.currenttime;
 
-        // }
-        setvideoURL(`${BASE_URL}${video.videos}/${video.videos}.mpd`)
-        
+      // }
+      setvideoURL(`${BASE_URL}${video.videos}/${video.videos}.mpd`)
+
     })
-   
+
     // setvideoURL("https://sagclapp.com/gpac/prepvideos/01IntroductionTo_IndAs/01IntroductionTo_IndAs.mpd")
 
   }
@@ -477,28 +474,9 @@ function OnlineHomePage({ history }) {
     var blob = new Blob([result]);
     resolve(blob);
   })
-  const getNotes = async (item, index) => {
-    localStorage.setItem("noteurl", "")
-    let filePath = `${userData.drivePath}/${selectedBatch.batchname}/notes/${SelectedTopic.topicname}.encrypted`;
-    await fs.exists(filePath, (exists) => {
-      if (exists) {
-        fs.readFile(filePath, (err, mydata) => {
-          if (mydata) {
-            DecryptOfflineFile(mydata).then((DecData) => {
-              let Fileurl = URL.createObjectURL(DecData);
-              if (Fileurl.length !== 0) {
-                localStorage.setItem("noteurl", Fileurl)
-                history.push('/OpenPdfFile', { state: { url: Fileurl } });
-              }
-            })
-          }
-        });
-      }
-      else {
-        toast("File not found")
-      }
-    }
-    )
+  const getNotes = async () => {
+    console.log(`${BASE_URL}notes/${SelectedTopic.topicname.replaceAll(" ", "_")}.pdf`);
+    localStorage.setItem("noteurl", `${BASE_URL}notes/${SelectedTopic.topicname.replaceAll(" ", "_")}.pdf`)
   }
 
   const LoadPlayer = (e) => {
@@ -803,22 +781,27 @@ function OnlineHomePage({ history }) {
                 </style>
               </Grid>
               <Grid item xs={8}>
-                {videoURL !== "" ?
+                {videoURL !== "" ? (
                   <ShakaPlayer
                     ref={videoRef}
                     id='videoid'
                     autoPlay
-                    //addBigPlayButton="true"
-                    // //enablekeyboardplaybackcontrols="true"
                     onTimeUpdate={e => getseeking(e)}
                     onLoadStart={(e) => LoadPlayer(e)}
                     width={window.require('@electron/remote').getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds().width - 150}
                     height={window.require('@electron/remote').getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds().height - 110}
                     poster="https://sagclapp.com/preplearn_poster.jpg"
-
                     src={videoURL}
                     style={{ width: '100%', height: '550' }} // Fixed height
-                  /> : null}
+                  />
+                ) : (
+                  <img
+                    src="https://sagclapp.com/preplearn_poster.jpg"
+                    alt="Poster"
+                    style={{ width: '100%', height: '550' }} // Fixed height to match ShakaPlayer
+                  />
+                )}
+
               </Grid>
 
             </Grid>

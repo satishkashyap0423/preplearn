@@ -350,7 +350,7 @@ export default function LoginPage({ history }) {
           return false
         }
 
-        if (data.data.systemstatus === 1 || data.data.systemstatus === '1') {
+        if (data.data.systemstatus === 0 || data.data.systemstatus === '0') {
           // open and save drive path on localstorage
           if (data.data.appversion === packageJson.version) {
             setuserDetail(data.data)
@@ -369,10 +369,12 @@ export default function LoginPage({ history }) {
           }
 
         }
-        else {
+        else if (data.data.systemstatus === 1 || data.data.systemstatus === '1') {
           // it is for online not for offline user.
+          localStorage.setItem("userDetail", JSON.stringify(data.data));
+          history.push('/OnlineHomePage')
+          
         }
-
       }
     })
   }
@@ -471,8 +473,7 @@ export default function LoginPage({ history }) {
       localStorage.setItem("AllTopics", JSON.stringify(getTopics.data));
       localStorage.setItem("AllVideos", JSON.stringify(getVideos.data));
       setloading(false)
-      // history.push('/HomePage')
-      history.push('/OnlineHomePage')
+      history.push('/HomePage')
     }
     else {
       userDetail["drivePath"] = `${driveinfo.Drive}/preplearn`;
@@ -488,8 +489,7 @@ export default function LoginPage({ history }) {
       localStorage.setItem("AllTopics", JSON.stringify(getTopics.data));
       localStorage.setItem("AllVideos", JSON.stringify(getVideos.data));
       setloading(false)
-      // history.push('/HomePage')
-      history.push('/OnlineHomePage')
+      history.push('/HomePage')
     }
 
   }

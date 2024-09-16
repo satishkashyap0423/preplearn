@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react'
-import {useSelector, useDispatch} from 'react-redux';
+import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux';
 import HomeIcon from '@material-ui/icons/Home';
 import Minimize from '@material-ui/icons/RemoveCircle';
 import Cancel from '@material-ui/icons/CancelRounded';
@@ -42,8 +42,8 @@ const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    justifyContent:'center',
-    alignItems:'center',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -98,18 +98,18 @@ const useStyles = makeStyles((theme) => ({
   },
   content: {
     flexGrow: 1,
-    paddingTop:70,
-    display:'flex', 
-    flexDirection:'column',
+    paddingTop: 70,
+    display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor:'#ffffff',
+    backgroundColor: '#ffffff',
     padding: theme.spacing(3),
   },
-  cardstyle:{
+  cardstyle: {
     width: '100%',
     maxWidth: 460,
-    borderRadius:20,
-    
+    borderRadius: 20,
+
   },
   paper: {
     marginTop: theme.spacing(3),
@@ -121,41 +121,41 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
   },
-    media: {
+  media: {
     width: '30%',
+  },
+  listClass: {
+    width: '100%',
+    maxWidth: 460,
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  large: {
+    width: 50,
+    height: 50,
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
+  search: {
+    position: 'relative',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: fade(theme.palette.common.white, 0.15),
+    '&:hover': {
+      backgroundColor: fade(theme.palette.common.white, 0.25),
     },
-    listClass:{
-        width: '100%',
-        maxWidth: 460,
-        display:'flex',
-        flexDirection:'column'
+    marginLeft: 0,
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      marginLeft: theme.spacing(1),
+      width: 'auto',
     },
-    large:{
-        width:50,
-        height:50,
-      },
-      backdrop: {
-        zIndex: theme.zIndex.drawer + 1,
-        color: '#fff',
-      },
-      search: {
-        position: 'relative',
-        borderRadius: theme.shape.borderRadius,
-        backgroundColor: fade(theme.palette.common.white, 0.15),
-        '&:hover': {
-          backgroundColor: fade(theme.palette.common.white, 0.25),
-        },
-        marginLeft: 0,
-        width: '100%',
-        [theme.breakpoints.up('sm')]: {
-          marginLeft: theme.spacing(1),
-          width: 'auto',
-        },
-      },
-      logo: {
-        maxWidth: 40,
-        marginRight: '10px'
-      },
+  },
+  logo: {
+    maxWidth: 40,
+    marginRight: '10px'
+  },
 }));
 const StyledBreadcrumb = withStyles((theme) => ({
   root: {
@@ -173,33 +173,32 @@ const StyledBreadcrumb = withStyles((theme) => ({
   },
 }))(Chip);
 // let ;
-export default function ProfilePage({history}) {
-    const classes = useStyles();
-    const theme = useTheme();
-    let profileDetails = JSON.parse(localStorage.getItem("userDetail"));
-    console.log(profileDetails)
-    
-    const Logout =()=>{
-      localStorage.clear();
-      history.push('/LoginPage')
-    }
-    const MinimizeApp = () => {
-      let windows = window.require('@electron/remote').getCurrentWindow();
-      windows.minimize();
-    }
-    const CloseApp = () => {
-      let windows = window.require('@electron/remote').getCurrentWindow();
-      console.log(windows.webContents.session.clearCache)
-      windows.webContents.session.clearCache();
-      windows.close()
-    }
-    
+let profileDetails = JSON.parse(localStorage.getItem("userDetail"));
+export default function ProfilePage({ history }) {
+  const classes = useStyles();
+  const theme = useTheme();
+
+  const Logout = () => {
+    localStorage.clear();
+    history.push('/LoginPage')
+  }
+  const MinimizeApp = () => {
+    let windows = window.require('@electron/remote').getCurrentWindow();
+    windows.minimize();
+  }
+  const CloseApp = () => {
+    let windows = window.require('@electron/remote').getCurrentWindow();
+    console.log(windows.webContents.session.clearCache)
+    windows.webContents.session.clearCache();
+    windows.close()
+  }
+
   return (
     <div className={classes.root}>
       <CssBaseline />
       <AppBar
         position="fixed"
-        style={{ backgroundColor: '#585858', width:'100%', }}
+        style={{ backgroundColor: '#585858', width: '100%', }}
         className={clsx(classes.appBar, { [classes.appBarShift]: open })}
       >
         <Toolbar
@@ -216,16 +215,16 @@ export default function ProfilePage({history}) {
             <Breadcrumbs aria-label="breadcrumb">
               <StyledBreadcrumb
                 component="button"
-                onClick={()=>history.push('/HomePage')}
+                onClick={() => profileDetails.systemstatus == 1 ? history.push('/OnlineHomePage') : history.push('/HomePage')}
                 style={{ backgroundColor: '#ffff' }}
                 label="Home"
-                // icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
+              // icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
               />
               <StyledBreadcrumb
                 component="button"
                 style={{ backgroundColor: '#ffff' }}
                 label="Profile"
-                // icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
+              // icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
               />
             </Breadcrumbs>
           </div>
@@ -245,87 +244,87 @@ export default function ProfilePage({history}) {
           </div>
         </Toolbar>
       </AppBar>
-     
+
       <main className={classes.content}>
-      <Container component="main" maxWidth="xs">
-      <div className={classes.paper}>
-      <Avatar className={classes.avatar} style={{ backgroundColor:'#ffb05c'}}>
-          <AccountCircleOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Profile
-        </Typography>
-       </div>
-       <Box display="flex" justifyContent="center" m={1} p={1} bgcolor="background.paper">
+        <Container component="main" maxWidth="xs">
+          <div className={classes.paper}>
+            <Avatar className={classes.avatar} style={{ backgroundColor: '#ffb05c' }}>
+              <AccountCircleOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Profile
+            </Typography>
+          </div>
+          <Box display="flex" justifyContent="center" m={1} p={1} bgcolor="background.paper">
             <Card className={classes.cardstyle}>
-            <CardContent>
-            <List className={classes.listClass}>
-            <ListItem>
-                <ListItemAvatar>
-                <Avatar style={{ backgroundColor:'#585858'}}>
-                    <VerifiedUserIcon />
-                </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={profileDetails.userName} secondary="Name" />
-            </ListItem>
-            <Divider variant="inset" component="li" />
-            <ListItem>
-                <ListItemAvatar>
-                <Avatar style={{ backgroundColor:'#585858'}}>
-                    <Email />
-                </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={profileDetails.email} secondary="E-mail" />
-            </ListItem>
-            <Divider variant="inset" component="li" />
-            <ListItem>
-                <ListItemAvatar>
-                <Avatar style={{ backgroundColor:'#585858'}}>
-                    <Call />
-                </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={profileDetails.mobileNumber} secondary="Mobile Number" />
-            </ListItem>
-            <Divider variant="inset" component="li" />
-            <ListItem>
-                <ListItemAvatar>
-                <Avatar style={{ backgroundColor:'#585858'}}>
-                    <LineWeight />
-                </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={profileDetails.boardName} secondary="Board" />
-            </ListItem>
-            <Divider variant="inset" component="li" />
-            <ListItem>
-                <ListItemAvatar>
-                <Avatar style={{ backgroundColor:'#585858'}}>
-                    <ViewModule />
-                </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={moment(profileDetails.membershipStartDate).format("DD-MM-yyyy")} secondary="Start Date" />
-            </ListItem>
-            <Divider variant="inset" component="li" />
-            <ListItem>
-                <ListItemAvatar>
-                <Avatar style={{ backgroundColor:'#585858'}}>
-                    <LibraryBooks />
-                </Avatar>
-                </ListItemAvatar>
-                <ListItemText  primary={moment(profileDetails.membershipStartDate).format("DD-MM-yyyy")} secondary="Subscribed Course" />
-            </ListItem>
-            <Divider variant="inset" component="li" />
-            <ListItem>
-                <ListItemAvatar>
-                <Avatar style={{ backgroundColor:'#585858'}}>
-                    <LibraryBooks />
-                </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={moment(profileDetails.membershipEndDate).format("DD-MM-yyyy")} secondary="Expiry" />
-            </ListItem>
-            </List>
-            </CardContent> 
+              <CardContent>
+                <List className={classes.listClass}>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar style={{ backgroundColor: '#585858' }}>
+                        <VerifiedUserIcon />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary={profileDetails.userName} secondary="Name" />
+                  </ListItem>
+                  <Divider variant="inset" component="li" />
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar style={{ backgroundColor: '#585858' }}>
+                        <Email />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary={profileDetails.email} secondary="E-mail" />
+                  </ListItem>
+                  <Divider variant="inset" component="li" />
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar style={{ backgroundColor: '#585858' }}>
+                        <Call />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary={profileDetails.mobileNumber} secondary="Mobile Number" />
+                  </ListItem>
+                  <Divider variant="inset" component="li" />
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar style={{ backgroundColor: '#585858' }}>
+                        <LineWeight />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary={profileDetails.boardName} secondary="Board" />
+                  </ListItem>
+                  <Divider variant="inset" component="li" />
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar style={{ backgroundColor: '#585858' }}>
+                        <ViewModule />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary={moment(profileDetails.membershipStartDate).format("DD-MM-yyyy")} secondary="Start Date" />
+                  </ListItem>
+                  <Divider variant="inset" component="li" />
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar style={{ backgroundColor: '#585858' }}>
+                        <LibraryBooks />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary={moment(profileDetails.membershipStartDate).format("DD-MM-yyyy")} secondary="Subscribed Course" />
+                  </ListItem>
+                  <Divider variant="inset" component="li" />
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar style={{ backgroundColor: '#585858' }}>
+                        <LibraryBooks />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary={moment(profileDetails.membershipEndDate).format("DD-MM-yyyy")} secondary="Expiry" />
+                  </ListItem>
+                </List>
+              </CardContent>
             </Card>
-            </Box>
+          </Box>
         </Container>
       </main>
     </div>

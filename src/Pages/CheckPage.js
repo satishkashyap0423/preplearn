@@ -6,10 +6,19 @@ export default function CheckPage({history}) {
     React.useEffect(() => {
         let teacherDetails = JSON.parse(localStorage.getItem("userDetail"));
         if(teacherDetails!=null && teacherDetails!=undefined){
-            setTimeout(() => {
-            history.push("/OnlineHomePage")
-                
-            }, 2000);
+            if(teacherDetails.systemstatus==1){
+              setTimeout(() => {
+                history.push("/OnlineHomePage")
+                    
+                }, 2000);
+            }
+            else if(teacherDetails.systemstatus==2){
+              setTimeout(() => {
+                history.push("/HomePage")
+                    
+                }, 2000);
+            }
+           
         }
         else {
             history.push("/LoginPage")
