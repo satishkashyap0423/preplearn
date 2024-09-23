@@ -25,10 +25,13 @@ import useMediaQuery from '@material-ui/core/useMediaQuery';
 import NoteIcon from '@material-ui/icons/Note';
 import Chip from '@material-ui/core/Chip';
 import Select from '@mui/material/Select';
+import { FetchInstance } from '../Service/Services';
 import { makeStyles, useTheme, emphasize, withStyles, fade } from '@material-ui/core/styles';
-import { Avatar, CircularProgress } from '@material-ui/core';
+import { Avatar, CircularProgress, Typography } from '@material-ui/core';
 import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
-
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
+import SyncIcon from '@mui/icons-material/Sync';
 import clsx from 'clsx';
 import Plyr from 'plyr-react'
 import "plyr-react/plyr.css"
@@ -239,11 +242,34 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     fontSize: 10,
     color: '#fff'
+  },
+  fab: {
+    position: 'fixed',
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
   }
 
 }));
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 let videoCountFile = `${homedir}/Downloads/videocounts.js`;
+let remark = [
+  {
+    key: 1,
+    name: "Regular Class",
+  },
+  {
+    key: 2,
+    name: "Exam Mentoring",
+  },
+  {
+    key: 3,
+    name: "Revision Lectures",
+  },
+  {
+    key: 4,
+    name: "Practice Lectures"
+  }
+]
 function HomePage({ history }) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -268,9 +294,13 @@ function HomePage({ history }) {
   const [SelectedSubject, setSelectedSubject] = React.useState("")
   const [SelectedChatper, setSelectedChatper] = useState("")
   const [loading, setloading] = useState(false)
+  const [selectedRemark, setselectedRemark] = useState(remark[0])
   const [open, setOpen] = React.useState(false);
   const [activeIndex, setactiveIndex] = useState(-1)
+  const [syncProgress, setsyncProgress] = React.useState(1);
+  const [openError, setopenError] = useState(false)
   const [isLocked, setIsLocked] = useState(true); // Player is locked by default
+  const [progressLoading, setprogressLoading] = useState(false)
   const classes = useStyles();
   const plyrRef = React.useRef(null)
   const userData = JSON.parse(localStorage.getItem("userDetail"));
@@ -297,19 +327,66 @@ function HomePage({ history }) {
   const handleBatchChange = (event) => {
     setselectedBatch(event.target.value);
     const filterData = local_master_toppics.filter(topic => topic.courseid.toString() === event.target.value.courseid.toString() && topic.levelid.toString() === event.target.value.levelid.toString() && topic.batchid.toString() === event.target.value.batchid.toString());
+    // console.log(filterData);
+    // setTopicsArray(filterData)
+    // setSelectedTopic(filterData[0])
+  }
+  const handleTopicChange = (event) => {
+    setVideosArray([])
+    setSelectedTopic(event.target.value);
+    fs.exists(videoCountFile, function (exists) {
+      if (exists) {
+        fs.readFile(videoCountFile, (err, mydata) => {
+          if (err) {
+            console.error("Error reading file:", err);
+            return;
+          }
+          try {
+            const parsedData = JSON.parse(mydata);
+            const mergedArray = local_masterupload.map((item, index) => {
+              return parsedData[index] !== undefined ? parsedData[index] : item;
+            });
+            const filterData = mergedArray.filter(obj => obj.courseid === event.target.value.courseid && obj.levelid === event.target.value.levelid && obj.batchid === event.target.value.batchid && obj.topicname === event.target.value.topicname);
+            console.log(filterData);
+            setvideoURL("")
+            setactiveIndex(-1)
+            setVideosArray(filterData);
+          } catch (error) {
+            console.error("Error parsing JSON data:", error);
+          }
+        });
+      }
+      else {
+        const filterData = local_masterupload.filter(obj => obj.courseid === event.target.value.courseid && obj.levelid === event.target.value.levelid && obj.batchid === event.target.value.batchid && obj.topicname === event.target.value.topicname);
+        console.log(filterData);
+        setvideoURL("")
+        setactiveIndex(-1)
+        setVideosArray(filterData);
+      }
+    });
+
+    // setVideosArray(filterData);
+  }
+
+  const handleRemarkChange = (event) => {
+    console.log(event.target.value.name)
+    setselectedRemark(event.target.value);
+    const filterData = local_master_toppics.filter(topic =>
+      topic.courseid.toString() === selectedBatch.courseid.toString() && topic.levelid.toString() === selectedBatch.levelid.toString() && topic.batchid.toString() === selectedBatch.batchid.toString() && topic.remark.trim().toString() == event.target.value.name.trim().toString()
+    );
     console.log(filterData);
     setTopicsArray(filterData)
     setSelectedTopic(filterData[0])
   }
-  const handleTopicChange = (event) => {
-    setSelectedTopic(event.target.value);
-    const filterData = local_masterupload.filter(obj => obj.courseid === event.target.value.courseid && obj.levelid === event.target.value.levelid && obj.batchid === event.target.value.batchid && obj.topicname === event.target.value.topicname);
-    console.log(filterData);
-    setvideoURL("")
-    setactiveIndex(-1)
-    setVideosArray(filterData);
-  }
 
+  // React.useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setsyncProgress((prevProgress) => (prevProgress >= 100 ? 0 : prevProgress + 10));
+  //   }, 800);
+  //   return () => {
+  //     clearInterval(timer);
+  //   };
+  // }, [])
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -322,6 +399,7 @@ function HomePage({ history }) {
         const userCourseIds = await userData.courseid.toString().split(",").map(id => id.trim());
         const userLevelIds = await userData.levelid.toString().split(",").map(id => id.trim());
         const userBatchIds = await userData.batchid.toString().split(",").map(id => id.trim());
+
         // Filter master_courses based on the course IDs in userData
         const filterCourseData = local_master_courses.filter(objA =>
           userCourseIds.includes(objA.courseid.toString())
@@ -343,13 +421,12 @@ function HomePage({ history }) {
         const initialBatch = filterBatchesData[0];
         setBatchesArray(filterBatchesData);
         setselectedBatch(initialBatch);
-
-        const filterTopicsData = local_master_toppics.filter(obj => obj.courseid === initialCourse.courseid && obj.levelid === initialLevel.levelid && obj.batchid === initialBatch.batchid);
+        setselectedRemark(remark[0])
+        const filterTopicsData = local_master_toppics.filter(obj => obj.courseid === initialCourse.courseid && obj.levelid === initialLevel.levelid && obj.batchid === initialBatch.batchid && obj.remark == remark[0].name.toString());
         console.log(filterTopicsData);
         const initialTopic = filterTopicsData[0];
         setTopicsArray(filterTopicsData)
         setSelectedTopic(initialTopic)
-
 
         const filterVideosData = local_masterupload.filter(obj => obj.courseid === initialCourse.courseid && obj.levelid === initialLevel.levelid && obj.batchid === initialBatch.batchid && obj.topicname === initialTopic.topicname);
         console.log(filterVideosData);
@@ -444,6 +521,9 @@ function HomePage({ history }) {
 
   const handleClose = () => {
     setOpen(false)
+  }
+  const handleErrorClose = () => {
+    setopenError(false)
   }
   const DecryptVideoAndPlay = (data) => {
     console.log(userData, data);
@@ -575,6 +655,81 @@ function HomePage({ history }) {
     )
 
   }
+
+  const SyncVideoData = async () => {
+    const exists = await fs.promises.access(videoCountFile).then(() => true).catch(() => false);
+
+    if (exists) {
+      const mydata = await fs.promises.readFile(videoCountFile);
+      let userVideoData = JSON.parse(mydata);
+      console.log(userVideoData);
+
+      const totalVideos = userVideoData.length;
+
+      for (let i = 0; i < totalVideos; i++) {
+        const video = userVideoData[i];
+        let bodydata = {
+          userid: userData.userid,
+          videoid: video.id,
+          batchid: selectedBatch.batchid,
+          mode: 'offline',
+          currenttime: video.currenttime,
+          duration: video.duration,
+          counts: video.count
+        };
+
+        try {
+          const data = await FetchInstance("POST", bodydata, "Analysis_Access");
+          console.log(data);
+
+          // Calculate and display progress
+          const progressPercentage = Math.round(((i + 1) / totalVideos) * 100);
+          console.log(`Progress: ${progressPercentage}%`);
+          setsyncProgress(progressPercentage)
+          setprogressLoading(true);
+
+          if (i === totalVideos - 1) {
+            setTimeout(() => {
+              setprogressLoading(false);
+            }, 500);
+          }
+        } catch (error) {
+          console.error("Error in FetchInstance:", error);
+        }
+      }
+    } else {
+      console.log("There are no videos to sync");
+    }
+  };
+
+
+  function CircularProgressWithLabel(props) {
+    return (
+      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+        <CircularProgress variant="determinate" {...props} />
+        <Box
+          sx={{
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            position: 'absolute',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography
+            variant="caption"
+            component="div"
+            sx={{ color: 'text.secondary' }}
+          >
+            {`${Math.round(props.value)}%`}
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
   return (
     <div className={classes.root}>
       {loading && (
@@ -593,8 +748,28 @@ function HomePage({ history }) {
           }}
         >
           <CircularProgress />
+
         </Box>
       )}
+      {progressLoading &&
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)', // Optional: To add a semi-transparent background
+            zIndex: 9999, // To make sure it is on top of other elements
+          }}
+        >
+          <CircularProgressWithLabel value={syncProgress} />
+
+        </Box>
+      }
       <AppBar
         position="fixed"
         style={{ backgroundColor: '#585858', width: '100%', }}
@@ -615,14 +790,27 @@ function HomePage({ history }) {
               <StyledBreadcrumb
                 component="button"
                 style={{ backgroundColor: '#ffff' }}
-                label={userData.fullname}
+                label={userData?.fullname}
                 icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
               />
             </Breadcrumbs>
           </div>
           <div className={classes.search} style={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton style={{ color: 'white' }} onClick={() => history.push('OfflineZoomPage')}>
+              <h1 style={{
+                fontSize: 12
+              }}>Zoom</h1>
+            </IconButton>
+            <IconButton style={{ color: 'white' }} onClick={() => SyncVideoData()}>
+              <SyncIcon />
+            </IconButton>
+            <IconButton style={{ color: 'white' }} onClick={() => history.push('FreeCoursePage')}>
+              <h1 style={{
+                fontSize: 12
+              }}>Free course</h1>
+            </IconButton>
             <IconButton style={{ color: 'white' }} onClick={() => Profile()}>
-              <AccountCircle />
+
             </IconButton>
             {/* <IconButton style={{ color: 'white' }} onClick={() => history.push('/EncryptedVideos')}>
         <Settings />
@@ -643,45 +831,48 @@ function HomePage({ history }) {
       <main className={classes.content}>
         <Container maxWidth="xl" style={{ marginTop: 5 }}>
           <Grid container spacing={2} style={{ marginTop: 5 }}>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="class-select-label">Course</InputLabel>
-                <Select
-                  labelId="class-select-label"
-                  id="class-select"
-                  value={selectedCourse}
-                  label="Class"
-                  onChange={handleCourseChange}
-                >
-                  {courseArray.map((item) =>
-                    <MenuItem key={item.courseid} value={item}>
-                      {item.coursename}
-                    </MenuItem>
-                  )}
-                </Select>
-              </FormControl>
+            <Grid item xs={6} style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center'
+            }}>
+              <Grid item xs>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="class-select-label">Course</InputLabel>
+                  <Select
+                    labelId="class-select-label"
+                    id="class-select"
+                    value={selectedCourse}
+                    label="Class"
+                    onChange={handleCourseChange}
+                  >
+                    {courseArray.map((item) =>
+                      <MenuItem key={item.courseid} value={item}>
+                        {item.coursename}
+                      </MenuItem>
+                    )}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="subject-select-label">Level</InputLabel>
+                  <Select
+                    labelId="subject-select-label"
+                    id="subject-select"
+                    value={selectedLevel}
+                    label="Subject"
+                    onChange={handleLevelChange}
+                  >
+                    {LevelArray?.map((item) => (
+                      <MenuItem key={item.subjectName} value={item}>
+                        <em>{item.levelname}</em>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="subject-select-label">Level</InputLabel>
-                <Select
-                  labelId="subject-select-label"
-                  id="subject-select"
-                  value={selectedLevel}
-                  label="Subject"
-                  onChange={handleLevelChange}
-                >
-                  {LevelArray?.map((item) => (
-                    <MenuItem key={item.subjectName} value={item}>
-                      <em>{item.levelname}</em>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-          </Grid>
-          <Grid container spacing={2} style={{ marginTop: 5 }}>
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
                 <InputLabel id="class-select-label">Batch</InputLabel>
@@ -697,6 +888,29 @@ function HomePage({ history }) {
                       {item.batchname}
                     </MenuItem>
                   )}
+                </Select>
+              </FormControl>
+            </Grid>
+
+          </Grid>
+          <Grid container spacing={2} style={{ marginTop: 5 }}>
+            <Grid item xs={6}>
+
+              <FormControl fullWidth size="small">
+                <InputLabel id="subject-select-label">Class Type</InputLabel>
+                <Select
+                  labelId="subject-select-label"
+                  id="subject-select"
+                  value={selectedRemark}
+                  label="Class Type"
+                  onChange={handleRemarkChange}
+                >
+                  {remark?.map((item) => (
+                    <MenuItem key={item.key} value={item}>
+                      <em>{item.name}</em>
+                    </MenuItem>
+                  ))}
+
                 </Select>
               </FormControl>
             </Grid>
@@ -760,7 +974,7 @@ function HomePage({ history }) {
               />
 
             </Breadcrumbs>
-            {SelectedTopic.notes == 1 &&
+            {SelectedTopic?.notes == 1 &&
               <IconButton onClick={() => getNotes()}>
                 <NoteIcon fontSize="small" style={{ color: '#f1c40f' }} />
               </IconButton>
@@ -788,8 +1002,12 @@ function HomePage({ history }) {
                     {VideosArray.map((sectionId, index) => (
                       <div key={`item-${sectionId}`} style={{ marginBottom: '15px', padding: '3px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
                         <ListItem
-                          button
                           onClick={async () => {
+                            if (sectionId.count >= parseInt(sectionId.videowatchlimit)) {
+                              // open dialog
+                              setopenError(true)
+                              return
+                            }
                             await DecryptVideoAndPlay(sectionId, index); // Handle decryption logic
                             setIsLocked(false); // Unlock the player after decryption
                           }}
@@ -884,7 +1102,11 @@ function HomePage({ history }) {
 
             </Grid>
           </Paper>
+          {/* <Fab onClick={()=>history.push('FreeCoursePage')} color="primary" aria-label="add" className={classes.fab}>
+            <AddIcon />
+          </Fab> */}
         </Container>
+
       </main>
       <Dialog
         fullScreen={fullScreen}
@@ -900,6 +1122,24 @@ function HomePage({ history }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary" autoFocus>
+            Okay
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        fullScreen={fullScreen}
+        open={openError}
+        onClose={handleErrorClose}
+        aria-labelledby="responsive-dialog-title"
+      >
+        <DialogTitle id="responsive-dialog-title">{"Video File Error"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Your video limit has been exceeded. Please contact the administrator.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleErrorClose} color="primary" autoFocus>
             Okay
           </Button>
         </DialogActions>

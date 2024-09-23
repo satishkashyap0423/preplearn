@@ -272,16 +272,17 @@ function OnlineHomePage({ history }) {
   const [SelectedSubject, setSelectedSubject] = React.useState("")
   const [SelectedChatper, setSelectedChatper] = useState("")
   const [selectedVideo, setselectedVideo] = useState("")
-  const [openError, setopenError] = useState(false)
   const [loading, setloading] = useState(false)
   const [open, setOpen] = React.useState(false);
   const [activeIndex, setactiveIndex] = useState(-1)
   const [isLocked, setIsLocked] = useState(true); // Player is locked by default
   const [CurrentTime, setCurrentTime] = useState(0)
   const [duration, setduration] = useState(0)
+  const [openError, setopenError] = useState(false)
   const classes = useStyles();
   const plyrRef = React.useRef(null)
   const videoRef = React.useRef(null);
+
   const userData = JSON.parse(localStorage.getItem("userDetail"));
   let local_master_level = JSON.parse(localStorage.getItem("AllLevels"));
   let local_master_batches = JSON.parse(localStorage.getItem("AllBatches"));
@@ -312,88 +313,49 @@ function OnlineHomePage({ history }) {
   const handleTopicChange = (event) => {
     setSelectedTopic(event.target.value);
     let videoBodyData = {
-      coursetype: 'maincourse',
+      coursetype: 'freecourse',
       userid: userData.userid,
-      courseid: userData.courseid,
-      batchid: selectedBatch?.batchid,
+      courseid: event.target.value.courseid,
+      batchid: event.target.value.batchid,
       subjectname: event.target.value.subjectname,
       topicname: event.target.value.topicname
     }
-    FetchInstance("POST", videoBodyData, "Chapterlist").then((videos) => {
+    FetchInstance("POST", videoBodyData, "Free_videolist").then((videos) => {
       setVideosArray(videos.data);
-      setvideoURL("")
-      setactiveIndex(-1)
-    }
-    )
-
+    })
   }
 
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        // get user course and user level
-        let courseArray = [];
+        setVideosArray([]);
+        setTopicsArray([]);
         console.log(userData)
-        let c1 = userData?.courseid.toString().split(",");
-        let c2 = userData?.coursename.toString().split(",");
-        if (c1.length === c2.length) {
-          courseArray = await c1.map((id, index) => ({
-            id: id,
-            coursename: c2[index]
-          }));
-        } else {
-          console.error('Arrays have different lengths.');
+        const userCourseIds = await userData.courseid.toString().split(",").map(id => id.trim());
+        const userLevelIds = await userData.levelid.toString().split(",").map(id => id.trim());
+        const userBatchIds = await userData.batchid.toString().split(",").map(id => id.trim());
+        let topicBodydata = {
+          freebatchid: userData.freebatchid,
+          remark: "Regular Class",
+          subjectname: userData.freesubject
         }
-
-        setcourseArray(courseArray)
-        setselectedCourse(courseArray[0])
-        let levelArray = [];
-        let l1 = userData.levelid.toString().split(",");
-        let l2 = userData.levelname.toString().split(",");
-        if (l1.length === l2.length) {
-          levelArray = await l1.map((id, index) => ({
-            id: id,
-            levelname: l2[index]
-          }));
-        } else {
-          console.error('Arrays have different lengths.');
-        }
-        setLevelArray(levelArray);
-        setselectedLevel(levelArray[0])
-        let batchesArray = userData.batchname.split(",")
-        let bodydata = {
-          userid: userData.userid,
-          batchnames: batchesArray,
-        }
-        FetchInstance("POST", bodydata, "getUserBatch").then((data) => {
-          if (!data.status) {
-            setBatchesArray(data.data)
-            setselectedBatch(data.data[0])
-            let topicBodydata = {
-              batchid: data.data[0].batchid,
-              chapterName: "Regular Class"
-            }
-            FetchInstance("POST", topicBodydata, "TopicList").then((topics) => {
-              setTopicsArray(topics.data)
-              setSelectedTopic(topics.data[0])
-              let videoBodyData = {
-                coursetype: 'maincourse',
-                userid: userData.userid,
-                courseid: userData.courseid,
-                batchid: data.data[0]?.batchid,
-                subjectname: topics.data[0].subjectname,
-                topicname: topics.data[0].topicname
-              }
-              FetchInstance("POST", videoBodyData, "Chapterlist").then((videos) => {
-                setVideosArray(videos.data);
-              }
-              )
-            })
+        FetchInstance("POST", topicBodydata, "free_topiclist").then((topics) => {
+          setTopicsArray(topics.data)
+          setSelectedTopic(topics.data[0])
+          let videoBodyData = {
+            coursetype: 'freecourse',
+            userid: userData.userid,
+            courseid: topics.data[0].courseid,
+            batchid: topics.data[0].batchid,
+            subjectname: topics.data[0].subjectname,
+            topicname: topics.data[0].topicname
           }
+          FetchInstance("POST", videoBodyData, "Free_videolist").then((videos) => {
+            setVideosArray(videos.data);
+          }
+          )
         })
-        // get batches of user on the base of course and level
-        // get topic on the base of course level or batch as well videos
 
       } catch (error) {
         console.error('Error reading files:', error);
@@ -411,6 +373,7 @@ function OnlineHomePage({ history }) {
   const handleErrorClose = () => {
     setopenError(false)
   }
+
   const Profile = () => {
     history.push('/ProfilePage')
   }
@@ -462,11 +425,11 @@ function OnlineHomePage({ history }) {
       //   player.getMediaElement().currentTime = videos.currenttime;
 
       // }
-      fetch(`${BASE_URL}${video.videos}/${video.videos}.mpd`)
+      fetch(`${BASE_URL}${video.videos.replace(/ /g, '_')}/${video.videos.replace(/ /g, '_')}.mpd`)
         .then(response => {
           console.log(response)
           if (response.status == 200) {
-            setvideoURL(`${BASE_URL}${video.videos}/${video.videos}.mpd`)
+            setvideoURL(`${BASE_URL}${video.videos.replace(/ /g, '_')}/${video.videos.replace(/ /g, '_')}.mpd`)
 
           }
           else {
@@ -553,9 +516,10 @@ function OnlineHomePage({ history }) {
             />
             <Breadcrumbs aria-label="breadcrumb">
               <StyledBreadcrumb
+                onClick={() => userData.systemstatus == 1 ? history.push('/OnlineHomePage') : history.push('/HomePage')}
                 component="button"
                 style={{ backgroundColor: '#ffff' }}
-                label={userData.fullname}
+                label={"Home"}
                 icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
               />
             </Breadcrumbs>
@@ -585,64 +549,7 @@ function OnlineHomePage({ history }) {
       <main className={classes.content}>
         <Container maxWidth="xl" style={{ marginTop: 5 }}>
           <Grid container spacing={2} style={{ marginTop: 5 }}>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="class-select-label">Course</InputLabel>
-                <Select
-                  labelId="class-select-label"
-                  id="class-select"
-                  value={selectedCourse}
-                  label="Class"
-                  onChange={handleCourseChange}
-                >
-                  {courseArray.map((item) =>
-                    <MenuItem key={item.courseid} value={item}>
-                      {item.coursename}
-                    </MenuItem>
-                  )}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="subject-select-label">Level</InputLabel>
-                <Select
-                  labelId="subject-select-label"
-                  id="subject-select"
-                  value={selectedLevel}
-                  label="Subject"
-                  onChange={handleLevelChange}
-                >
-                  {LevelArray?.map((item) => (
-                    <MenuItem key={item.subjectName} value={item}>
-                      <em>{item.levelname}</em>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-          </Grid>
-          <Grid container spacing={2} style={{ marginTop: 5 }}>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="class-select-label">Batch</InputLabel>
-                <Select
-                  labelId="class-select-label"
-                  id="class-select"
-                  value={selectedBatch}
-                  label="Class"
-                  onChange={handleBatchChange}
-                >
-                  {BatchesArray.map((item) =>
-                    <MenuItem key={item.batchid} value={item}>
-                      {item.batchname}
-                    </MenuItem>
-                  )}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12}>
               <FormControl fullWidth size="small">
                 <InputLabel id="subject-select-label">Topics</InputLabel>
                 <Select
@@ -676,24 +583,6 @@ function OnlineHomePage({ history }) {
             }}
           >
             <Breadcrumbs aria-label="breadcrumb">
-              <StyledBreadcrumb
-                component="button"
-                style={{ backgroundColor: '#ffff' }}
-                label={selectedCourse ? selectedCourse.coursename : "Couse"}
-              // icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
-              />
-              <StyledBreadcrumb
-                component="button"
-                style={{ backgroundColor: '#ffff' }}
-                label={selectedLevel ? selectedLevel.levelname : "Level"}
-              // icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
-              />
-              <StyledBreadcrumb
-                component="button"
-                style={{ backgroundColor: '#ffff' }}
-                label={selectedBatch ? selectedBatch.batchname : "Batch"}
-              // icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
-              />
               <StyledBreadcrumb
                 component="button"
                 style={{ backgroundColor: '#ffff' }}

@@ -373,7 +373,7 @@ export default function LoginPage({ history }) {
           // it is for online not for offline user.
           localStorage.setItem("userDetail", JSON.stringify(data.data));
           history.push('/OnlineHomePage')
-          
+
         }
       }
     })
@@ -456,6 +456,8 @@ export default function LoginPage({ history }) {
   const getInfo = async (driveinfo) => {
     setDiskDrive({ DataDisk: [], Open: false, Message: '' });
     setloading(true)
+    console.log(userDetail)
+    let allFreeVideos = [];
     let path = `${driveinfo.Drive}/${userDetail.boardName}`;
     if (!fs.existsSync(path)) {
       fs.mkdirSync(path, { recursive: true });
@@ -466,7 +468,19 @@ export default function LoginPage({ history }) {
       let getLevels = await FetchInstance("GET", "", "getAllLevel");
       let getBatches = await FetchInstance("GET", "", "getAllBatches");
       let getTopics = await FetchInstance("GET", "", "getAllTopics");
-      let getVideos = await FetchInstance("GET", "", "getAllVideos");
+      // let getVideos = await FetchInstance("GET", "", "getAllVideos");
+      let getVideos = [];
+      if (userDetail.freesubject !== "" && userDetail.freesubject !== undefined && userDetail.freecourse !== "no") {
+        let bodydata = {
+          freebatchid: userDetail.freebatchid,
+          remark: "Regular Class",
+          subjectname: userDetail.freesubject
+        }
+        let getFreeTopics = await FetchInstance("POST", bodydata, "free_topiclist");
+        // let getFreeVideos = await FetchInstance("GET", "", "getFreeVideos");
+        localStorage.setItem("AllFreeTopics", JSON.stringify(getFreeTopics.data));
+        // localStorage.setItem("AllFreeVideo", JSON.stringify(getFreeVideos.data));
+      }
       localStorage.setItem("AllCourse", JSON.stringify(getCourses.data));
       localStorage.setItem("AllLevels", JSON.stringify(getLevels.data));
       localStorage.setItem("AllBatches", JSON.stringify(getBatches.data));
@@ -483,6 +497,18 @@ export default function LoginPage({ history }) {
       let getBatches = await FetchInstance("GET", "", "getAllBatches");
       let getTopics = await FetchInstance("GET", "", "getAllTopics");
       let getVideos = await FetchInstance("GET", "", "getAllVideos");
+      if (userDetail.freesubject !== "" && userDetail.freesubject !== undefined && userDetail.freecourse !== "no") {
+        let bodydata = {
+          freebatchid: userDetail.freebatchid,
+          remark: "Regular Class",
+          subjectname: userDetail.freesubject
+        }
+        let getFreeTopics = await FetchInstance("POST", bodydata, "free_topiclist");
+        let getFreeVideos = await FetchInstance("GET", "", "getFreeVideos");
+        localStorage.setItem("AllFreeTopics", JSON.stringify(getFreeTopics.data));
+        localStorage.setItem("AllFreeVideo", JSON.stringify(getFreeVideos.data));
+      }
+      
       localStorage.setItem("AllCourse", JSON.stringify(getCourses.data));
       localStorage.setItem("AllLevels", JSON.stringify(getLevels.data));
       localStorage.setItem("AllBatches", JSON.stringify(getBatches.data));
@@ -512,24 +538,24 @@ export default function LoginPage({ history }) {
   return (
     <div className={classes.root}>
       <ThemeProvider theme={defaultTheme}>
-      {loading && (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)', // Optional: To add a semi-transparent background
-            zIndex: 9999, // To make sure it is on top of other elements
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      )}
+        {loading && (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)', // Optional: To add a semi-transparent background
+              zIndex: 9999, // To make sure it is on top of other elements
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
         <AppBar className={classes.appbar}>
           <Toolbar>
             <IconButton className={classes.minimizeButton}>

@@ -6,10 +6,15 @@ import HomePage from './Pages/HomePage';
 import ProfilePage from './Pages/ProfilePage';
 import OpenPdfFile from './Pages/OpenPdfFile';
 import OnlineHomePage from './Pages/OnlineHomePage';
+import FreeCoursePage from './Pages/FreeCoursePage';
+import OfflineZoomPage from './Pages/OfflineZoomPage';
+import OnlineFreeCoursePage from './Pages/OnlineFreeCoursePage';
 const Routes = () => {
   return (
     <Switch>
-
+      <Route path="/OnlineFreeCoursePage" component ={OnlineFreeCoursePage}/>
+      <Route path="/OfflineZoomPage" component ={OfflineZoomPage}/>
+      <Route path="/FreeCoursePage" component ={FreeCoursePage}/>
       <Route path="/OpenPdfFile" component ={OpenPdfFile}/>
       <Route path="/ProfilePage" component ={ProfilePage}/>
       <Route path="/OnlineHomePage" component ={OnlineHomePage}/>

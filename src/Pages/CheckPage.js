@@ -12,7 +12,7 @@ export default function CheckPage({history}) {
                     
                 }, 2000);
             }
-            else if(teacherDetails.systemstatus==2){
+            else if(teacherDetails.systemstatus==0){
               setTimeout(() => {
                 history.push("/HomePage")
                     

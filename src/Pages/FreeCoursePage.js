@@ -1,7 +1,4 @@
 import * as React from 'react';
-import ShakaPlayer from "shaka-player-react";
-import shaka from 'shaka-player/dist/shaka-player.ui';
-import "shaka-player/dist/controls.css";
 import AppBar from '@material-ui/core/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -31,6 +28,8 @@ import Select from '@mui/material/Select';
 import { makeStyles, useTheme, emphasize, withStyles, fade } from '@material-ui/core/styles';
 import { Avatar, CircularProgress } from '@material-ui/core';
 import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
 
 import clsx from 'clsx';
 import Plyr from 'plyr-react'
@@ -41,7 +40,6 @@ const homedir = window.require('os').homedir();
 const drawerWidth = 260;
 import { List, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { BASE_URL, FetchInstance } from '../Service/Services';
 const StyledBreadcrumb = withStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.grey[100],
@@ -243,12 +241,35 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     fontSize: 10,
     color: '#fff'
+  },
+  fab: {
+    position: 'fixed',
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
   }
 
 }));
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 let videoCountFile = `${homedir}/Downloads/videocounts.js`;
-function OnlineHomePage({ history }) {
+let remark = [
+  {
+    key: 1,
+    name: "Regular Class",
+  },
+  {
+    key: 2,
+    name: "Exam Mentoring",
+  },
+  {
+    key: 3,
+    name: "Revision Lectures",
+  },
+  {
+    key: 4,
+    name: "Practice Lectures"
+  }
+]
+function FreeCoursePage({ history }) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -271,129 +292,84 @@ function OnlineHomePage({ history }) {
   const [SelectedTopic, setSelectedTopic] = useState("")
   const [SelectedSubject, setSelectedSubject] = React.useState("")
   const [SelectedChatper, setSelectedChatper] = useState("")
-  const [selectedVideo, setselectedVideo] = useState("")
-  const [openError, setopenError] = useState(false)
   const [loading, setloading] = useState(false)
+  const [selectedRemark, setselectedRemark] = useState(remark[0])
   const [open, setOpen] = React.useState(false);
+  const [openError, setopenError] = useState(false)
   const [activeIndex, setactiveIndex] = useState(-1)
   const [isLocked, setIsLocked] = useState(true); // Player is locked by default
-  const [CurrentTime, setCurrentTime] = useState(0)
-  const [duration, setduration] = useState(0)
   const classes = useStyles();
   const plyrRef = React.useRef(null)
-  const videoRef = React.useRef(null);
   const userData = JSON.parse(localStorage.getItem("userDetail"));
-  let local_master_level = JSON.parse(localStorage.getItem("AllLevels"));
-  let local_master_batches = JSON.parse(localStorage.getItem("AllBatches"));
-  const handleCourseChange = (event) => {
-    setselectedCourse(event.target.value);
-    const filterlevel = local_master_level.filter(level => level.courseid.toString() === event.target.value.courseid.toString());
-    setLevelArray(filterlevel);
-    // setSelectedSubject(filterData[0]) 
-  };
+  let local_free_toppics = JSON.parse(localStorage.getItem("AllFreeTopics"));
+  let local_free_videos = JSON.parse(localStorage.getItem("AllFreeVideo"));
 
-  const handleLevelChange = (event) => {
-    setselectedLevel(event.target.value);
-    const filterData = local_master_batches.filter(batch => batch.courseid.toString() === event.target.value.courseid.toString() && batch.levelid.toString() === event.target.value.levelid.toString());
-    ;
-    setBatchesArray(filterData)
-    // setSelectedChatper(filterData[0])
-  }
-  const handleBatchChange = (event) => {
-    let topicBodydata = {
-      batchid: event.target.value.batchid,
-      chapterName: "Regular Class"
-    }
-    FetchInstance("POST", topicBodydata, "TopicList").then((topics) => {
-      setTopicsArray(topics.data)
-      setSelectedTopic(topics.data[0])
-    })
-  }
   const handleTopicChange = (event) => {
     setSelectedTopic(event.target.value);
-    let videoBodyData = {
-      coursetype: 'maincourse',
-      userid: userData.userid,
-      courseid: userData.courseid,
-      batchid: selectedBatch?.batchid,
-      subjectname: event.target.value.subjectname,
-      topicname: event.target.value.topicname
-    }
-    FetchInstance("POST", videoBodyData, "Chapterlist").then((videos) => {
-      setVideosArray(videos.data);
-      setvideoURL("")
-      setactiveIndex(-1)
-    }
-    )
-
+    console.log(local_free_videos)
+    const filterData = local_free_videos.filter(obj => obj.courseid === event.target.value.courseid && obj.levelid === event.target.value.levelid && obj.batchid === event.target.value.batchid && obj.topicname === event.target.value.topicname);
+    console.log(filterData);
+    setvideoURL("")
+    setactiveIndex(-1)
+    setVideosArray(filterData);
   }
 
+  const handleRemarkChange = (event) => {
+    console.log(event.target.value.name)
+    setselectedRemark(event.target.value);
+    const filterData = local_master_toppics.filter(topic =>
+      topic.courseid.toString() === selectedBatch.courseid.toString() && topic.levelid.toString() === selectedBatch.levelid.toString() && topic.batchid.toString() === selectedBatch.batchid.toString() && topic.remark.trim().toString() == event.target.value.name.trim().toString()
+    );
+    console.log(filterData);
+    setTopicsArray(filterData)
+    setSelectedTopic(filterData[0])
+  }
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        // get user course and user level
-        let courseArray = [];
+        setVideosArray([]);
+        setTopicsArray([]);
         console.log(userData)
-        let c1 = userData?.courseid.toString().split(",");
-        let c2 = userData?.coursename.toString().split(",");
-        if (c1.length === c2.length) {
-          courseArray = await c1.map((id, index) => ({
-            id: id,
-            coursename: c2[index]
-          }));
-        } else {
-          console.error('Arrays have different lengths.');
-        }
+        const userCourseIds = await userData.courseid.toString().split(",").map(id => id.trim());
+        const userLevelIds = await userData.levelid.toString().split(",").map(id => id.trim());
+        const userBatchIds = await userData.batchid.toString().split(",").map(id => id.trim());
 
-        setcourseArray(courseArray)
-        setselectedCourse(courseArray[0])
-        let levelArray = [];
-        let l1 = userData.levelid.toString().split(",");
-        let l2 = userData.levelname.toString().split(",");
-        if (l1.length === l2.length) {
-          levelArray = await l1.map((id, index) => ({
-            id: id,
-            levelname: l2[index]
-          }));
-        } else {
-          console.error('Arrays have different lengths.');
-        }
-        setLevelArray(levelArray);
-        setselectedLevel(levelArray[0])
-        let batchesArray = userData.batchname.split(",")
-        let bodydata = {
-          userid: userData.userid,
-          batchnames: batchesArray,
-        }
-        FetchInstance("POST", bodydata, "getUserBatch").then((data) => {
-          if (!data.status) {
-            setBatchesArray(data.data)
-            setselectedBatch(data.data[0])
-            let topicBodydata = {
-              batchid: data.data[0].batchid,
-              chapterName: "Regular Class"
+        // Filter master_courses based on the course IDs in userData
+        // Free course vidos filter on the base of batch id
+        const filterTopicsData = local_free_toppics.filter(obj => obj.batchid === userData.freebatchid);
+        console.log(filterTopicsData);
+        const initialTopic = filterTopicsData[0];
+        setTopicsArray(filterTopicsData)
+        setSelectedTopic(initialTopic)
+        const filterVideosData = local_free_videos.filter(obj => obj.courseid === initialTopic.courseid && obj.levelid === initialTopic.levelid && obj.batchid === initialTopic.batchid && obj.topicname === initialTopic.topicname);
+        console.log(filterVideosData);
+        if (filterVideosData.length > 0) {
+          console.log("hello", filterVideosData);
+          fs.exists(videoCountFile, function (exists) {
+            if (exists) {
+              fs.readFile(videoCountFile, (err, mydata) => {
+                if (err) {
+                  console.error("Error reading file:", err);
+                  return;
+                }
+
+                try {
+                  const parsedData = JSON.parse(mydata);
+                  const mergedArray = mergeArrays(filterVideosData, parsedData);
+                  console.log("mergedArray", mergedArray)
+                  setVideosArray(mergedArray);
+
+                } catch (error) {
+                  console.error("Error parsing JSON data:", error);
+                }
+              });
             }
-            FetchInstance("POST", topicBodydata, "TopicList").then((topics) => {
-              setTopicsArray(topics.data)
-              setSelectedTopic(topics.data[0])
-              let videoBodyData = {
-                coursetype: 'maincourse',
-                userid: userData.userid,
-                courseid: userData.courseid,
-                batchid: data.data[0]?.batchid,
-                subjectname: topics.data[0].subjectname,
-                topicname: topics.data[0].topicname
-              }
-              FetchInstance("POST", videoBodyData, "Chapterlist").then((videos) => {
-                setVideosArray(videos.data);
-              }
-              )
-            })
-          }
-        })
-        // get batches of user on the base of course and level
-        // get topic on the base of course level or batch as well videos
+            else {
+              setVideosArray(filterVideosData);
+            }
+          });
+        }
 
       } catch (error) {
         console.error('Error reading files:', error);
@@ -403,6 +379,59 @@ function OnlineHomePage({ history }) {
 
   }, []);
 
+  const mergeArrays = (arr1, arr2) => {
+    // Create a map from the first array to allow quick lookups
+    const map = new Map(arr1.map(item => [item.id, item]));
+
+    // Iterate over the second array
+    arr2.forEach(item => {
+      if (map.has(item.id)) {
+        // If the item exists in the map, merge the properties
+        Object.assign(map.get(item.id), item);
+      } else {
+        // Otherwise, add the new item
+        map.set(item.id, item);
+      }
+    });
+
+    // Return the merged array as an array from the map values
+    return Array.from(map.values());
+  };
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
+  const DecryptFile = (mydata, filePath, index) => new Promise((resolve, reject) => {
+    var arr = [];
+    var key = new Buffer('CooL2116NiTh5252');
+    var decipher = crypto.createDecipheriv('aes-128-ecb', key, "");
+    var infile = fs.createReadStream(filePath);
+    var size = fs.statSync(filePath).size;
+    // to change color of progress
+    // document.getElementById('myBar').style.backgroundColor="#4CAF50";
+    // setmaxstdvalue(size)
+    infile.on('data', function (mydata) {
+      var percentage = parseInt(infile.bytesRead) / parseInt(size);
+      console.log(percentage * 100);
+      // setprogressstdValue(percentage * 100)
+
+      // setdowmloadProgress(percentage)
+      let result = decipher.update(mydata);
+      if (result) {
+        arr.push(Buffer.from(result))
+      }
+    });
+    infile.on('close', function () {
+      var buf = Buffer.concat(arr)
+      let blob = new Blob([buf]);
+      // setshowProgress(false)
+      resolve(blob);
+    })
+  })
 
   const handleClose = () => {
     setOpen(false)
@@ -411,6 +440,73 @@ function OnlineHomePage({ history }) {
   const handleErrorClose = () => {
     setopenError(false)
   }
+  const DecryptVideoAndPlay = (data) => {
+    console.log(userData, data);
+    setvideoURL("")
+    // add count against every video on click and write into the file and compare that file data with show count against video
+    fs.exists(videoCountFile, function (exists) {
+      if (exists) {
+        fs.readFile(videoCountFile, (err, mydata) => {
+          let userVideoData = JSON.parse(mydata);
+          console.log(userVideoData);
+          let videoIndex = userVideoData.findIndex(obj => obj.videos == data.videos && obj.batchid === userData.freebatchid && obj.topicname === SelectedTopic.topicname);
+          console.log(videoIndex)
+          if (videoIndex >= 0) {
+            // replce video at that index 
+            data["count"] = !data.count ? 1 : data.count + 1;
+            userVideoData[videoIndex] = data
+            fs.writeFile(videoCountFile, JSON.stringify(userVideoData), function (err) {
+              if (err) throw err;
+              console.log('Saved!');
+            });
+          }
+          else {
+            // add video 
+            data["count"] = 1;
+            userVideoData[videoIndex] = data
+            userVideoData.push(data)
+            fs.writeFile(videoCountFile, JSON.stringify(userVideoData), function (err) {
+              if (err) throw err;
+              console.log('Saved!');
+            });
+          }
+        })
+      }
+      else {
+        let videoArray = [];
+        data["count"] = 1;
+        videoArray.push(data)
+        fs.writeFile(videoCountFile, JSON.stringify(videoArray), function (err) {
+          if (err) throw err;
+          console.log('Saved!');
+        });
+      }
+    })
+    const videoPath = `${userData.drivePath}/${data.coursename}/${data.videos}.encrypted`;
+    // console.log(SelectedClaas, SelectedSubject, SelectedChatper);
+    fs.readFile(videoPath, (err, mydata) => {
+      if (err) {
+        console.log(err.stack);
+        setOpen(true)
+        return;
+      }
+      if (mydata) {
+        DecryptFile(mydata, videoPath, 0).then((DecData) => {
+          let Fileurl = URL.createObjectURL(DecData);
+          if (Fileurl) {
+            setvideoURL(Fileurl)
+            setTimeout(() => {
+              console.log(plyrRef.current.plyr)
+              if (plyrRef.current) {
+                plyrRef.current.plyr.play();
+              }
+            }, 300);
+          }
+        })
+      }
+    })
+  }
+
   const Profile = () => {
     history.push('/ProfilePage')
   }
@@ -422,98 +518,54 @@ function OnlineHomePage({ history }) {
     let windows = window.require('@electron/remote').getCurrentWindow();
     windows.minimize();
   }
-  const CloseApp = async () => {
-    let bodydata = {
-      userid: userData.userid,
-      videoid: selectedVideo.id,
-      batchid: selectedBatch.batchid,
-      mode: 'online',
-      currenttime: CurrentTime,
-      duration: duration,
-      counts: selectedVideo.watchcount
-    }
-    await FetchInstance("POST", bodydata, "Analysis_Access").then((data) => {
-      if (data.status === 200) {
-        let windows = window.require('@electron/remote').getCurrentWindow();
-        windows.webContents.session.clearCache();
-        windows.close()
-      }
-    })
-
+  const CloseApp = () => {
+    let windows = window.require('@electron/remote').getCurrentWindow();
+    console.log(windows.webContents.session.clearCache)
+    windows.webContents.session.clearCache();
+    windows.close()
   }
 
-  const PlayVideo = async (video, index) => {
-    let bodydata = {
-      userid: userData.userid,
-      videoid: video.id,
-      batchid: selectedBatch.batchid,
-      mode: 'online',
-      currenttime: video.currenttime ? video.currenttime : 0,
-      duration: duration,
-      counts: video.watchcount === null ? 1 : video.watchcount + 1
-    }
-    await FetchInstance("POST", bodydata, "Analysis_Access").then((data) => {
-      const videos = VideosArray.find(item => item.id === video.id);
-      if (videos) {
-        videos.watchcount = video.watchcount === null ? 1 : video.watchcount + 1;
-      }
-      setselectedVideo(video)
-      // if(player){
-      //   player.getMediaElement().currentTime = videos.currenttime;
-
-      // }
-      fetch(`${BASE_URL}${video.videos}/${video.videos}.mpd`)
-        .then(response => {
-          console.log(response)
-          if (response.status == 200) {
-            setvideoURL(`${BASE_URL}${video.videos}/${video.videos}.mpd`)
-
-          }
-          else {
-            setOpen(true)
-          }
-        })
-
-    })
-
-    // setvideoURL("https://sagclapp.com/gpac/prepvideos/01IntroductionTo_IndAs/01IntroductionTo_IndAs.mpd")
-
-  }
   const DecryptOfflineFile = (mydata) => new Promise((resolve, reject) => {
+    console.log(mydata)
     const pass = 'CooL2116NiTh5252';
     var algorithm = "aes-128-ecb";
     var key = new Buffer(pass)
     var decipher = crypto.createDecipheriv(algorithm, key, "");
     let result = decipher.update(mydata);
+    console.log(result)
     var blob = new Blob([result]);
+    console.log(typeof (blob))
     resolve(blob);
   })
-  const getNotes = async () => {
-    console.log(`${BASE_URL}notes/${SelectedTopic.topicname.replaceAll(" ", "_")}.pdf`);
-    localStorage.setItem("noteurl", `${BASE_URL}notes/${SelectedTopic.topicname.replaceAll(" ", "_")}.pdf`)
-  }
-
-  const LoadPlayer = (e) => {
-    let { player, ui } = videoRef.current;
-    player.getMediaElement().currentTime = selectedVideo.currenttime;
-    const config = {
-      //playbackRates:[0.5, 1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2],
-      //'overflowMenuButtons' : ['playback_rate'],
-      'overflowMenuButtons': ['playback_rate'],
-      'playbackRates': [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
-      //controlPanelElements:['rewind', 'fast_forward'],
-      enableKeyboardPlaybackControls: true,
-      addBigPlayButton: true,
-    };
-    ui.configure(config);
-
-  }
-  const getseeking = (e) => {
-    let { player, ui } = videoRef.current;
-    if (player) {
-      setCurrentTime(e.target.currentTime)
-      setduration(e.target.duration)
+  const getNotes = async (item, index) => {
+    localStorage.setItem("noteurl", "")
+    // console.log(item.topicname.replaceAll(" ", "_"))
+    // console.log(`${BASE_URL}notes/${item.topicname.replaceAll(" ", "_")}.pdf`)
+    // return false
+    let filePath = `${userData.drivePath}/${selectedBatch.batchname}/notes/${SelectedTopic.topicname}.encrypted`;
+    console.log(filePath)
+    await fs.exists(filePath, (exists) => {
+      console.log(exists)
+      if (exists) {
+        fs.readFile(filePath, (err, mydata) => {
+          if (mydata) {
+            DecryptOfflineFile(mydata).then((DecData) => {
+              let Fileurl = URL.createObjectURL(DecData);
+              console.log(Fileurl)
+              if (Fileurl.length !== 0) {
+                localStorage.setItem("noteurl", Fileurl)
+                history.push('/OpenPdfFile', { state: { url: Fileurl } });
+              }
+            })
+          }
+        });
+      }
+      else {
+        toast("File not found")
+      }
     }
+    )
+
   }
   return (
     <div className={classes.root}>
@@ -537,7 +589,7 @@ function OnlineHomePage({ history }) {
       )}
       <AppBar
         position="fixed"
-        style={{ backgroundColor: '#FF0000', width: '100%', }}
+        style={{ backgroundColor: '#585858', width: '100%', }}
         className={clsx(classes.appBar, { [classes.appBarShift]: open })}
       >
         <Toolbar
@@ -554,21 +606,20 @@ function OnlineHomePage({ history }) {
             <Breadcrumbs aria-label="breadcrumb">
               <StyledBreadcrumb
                 component="button"
+                onClick={() => userData.systemstatus == 1 ? history.push('/OnlineHomePage') : history.push('/HomePage')}
                 style={{ backgroundColor: '#ffff' }}
-                label={userData.fullname}
+                label="Home"
                 icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
               />
             </Breadcrumbs>
           </div>
           <div className={classes.search} style={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton style={{ color: 'white' }} onClick={() => history.push('OnlineFreeCoursePage')}>
-              <h1 style={{
-                fontSize: 12
-              }}>Free course</h1>
-            </IconButton>
             <IconButton style={{ color: 'white' }} onClick={() => Profile()}>
               <AccountCircle />
             </IconButton>
+            {/* <IconButton style={{ color: 'white' }} onClick={() => history.push('/EncryptedVideos')}>
+        <Settings />
+      </IconButton> */}
             <IconButton style={{ color: 'white' }} onClick={() => Logout()}>
               <ExitToAppIcon />
             </IconButton>
@@ -585,64 +636,7 @@ function OnlineHomePage({ history }) {
       <main className={classes.content}>
         <Container maxWidth="xl" style={{ marginTop: 5 }}>
           <Grid container spacing={2} style={{ marginTop: 5 }}>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="class-select-label">Course</InputLabel>
-                <Select
-                  labelId="class-select-label"
-                  id="class-select"
-                  value={selectedCourse}
-                  label="Class"
-                  onChange={handleCourseChange}
-                >
-                  {courseArray.map((item) =>
-                    <MenuItem key={item.courseid} value={item}>
-                      {item.coursename}
-                    </MenuItem>
-                  )}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="subject-select-label">Level</InputLabel>
-                <Select
-                  labelId="subject-select-label"
-                  id="subject-select"
-                  value={selectedLevel}
-                  label="Subject"
-                  onChange={handleLevelChange}
-                >
-                  {LevelArray?.map((item) => (
-                    <MenuItem key={item.subjectName} value={item}>
-                      <em>{item.levelname}</em>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-          </Grid>
-          <Grid container spacing={2} style={{ marginTop: 5 }}>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="class-select-label">Batch</InputLabel>
-                <Select
-                  labelId="class-select-label"
-                  id="class-select"
-                  value={selectedBatch}
-                  label="Class"
-                  onChange={handleBatchChange}
-                >
-                  {BatchesArray.map((item) =>
-                    <MenuItem key={item.batchid} value={item}>
-                      {item.batchname}
-                    </MenuItem>
-                  )}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12}>
               <FormControl fullWidth size="small">
                 <InputLabel id="subject-select-label">Topics</InputLabel>
                 <Select
@@ -676,7 +670,7 @@ function OnlineHomePage({ history }) {
             }}
           >
             <Breadcrumbs aria-label="breadcrumb">
-              <StyledBreadcrumb
+              {/* <StyledBreadcrumb
                 component="button"
                 style={{ backgroundColor: '#ffff' }}
                 label={selectedCourse ? selectedCourse.coursename : "Couse"}
@@ -693,7 +687,7 @@ function OnlineHomePage({ history }) {
                 style={{ backgroundColor: '#ffff' }}
                 label={selectedBatch ? selectedBatch.batchname : "Batch"}
               // icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
-              />
+              /> */}
               <StyledBreadcrumb
                 component="button"
                 style={{ backgroundColor: '#ffff' }}
@@ -702,7 +696,7 @@ function OnlineHomePage({ history }) {
               />
 
             </Breadcrumbs>
-            {SelectedTopic.notes == 1 &&
+            {SelectedTopic?.notes == 1 &&
               <IconButton onClick={() => getNotes()}>
                 <NoteIcon fontSize="small" style={{ color: '#f1c40f' }} />
               </IconButton>
@@ -737,7 +731,7 @@ function OnlineHomePage({ history }) {
                               setopenError(true)
                               return
                             }
-                            await PlayVideo(sectionId, index);
+                            await DecryptVideoAndPlay(sectionId, index); // Handle decryption logic
                             setIsLocked(false); // Unlock the player after decryption
                           }}
                           style={{
@@ -774,7 +768,7 @@ function OnlineHomePage({ history }) {
                           <ListItemText
                             primary={`${sectionId.videos}`}
                             primaryTypographyProps={{ fontWeight: '500', fontSize: '1rem' }}
-                            secondary={`views ${sectionId.watchcount ? sectionId.watchcount : ""}`}
+                            secondary={`views ${sectionId.count ? sectionId.count : ""}`}
                           />
                         </ListItem>
                       </div>
@@ -802,32 +796,37 @@ function OnlineHomePage({ history }) {
                 </style>
               </Grid>
               <Grid item xs={8}>
-                {videoURL !== "" ? (
-                  <ShakaPlayer
-                    ref={videoRef}
-                    id='videoid'
-                    autoPlay
-                    onTimeUpdate={e => getseeking(e)}
-                    onLoadStart={(e) => LoadPlayer(e)}
-                    width={window.require('@electron/remote').getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds().width - 150}
-                    height={window.require('@electron/remote').getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds().height - 110}
-                    poster="https://sagclapp.com/preplearn_poster.jpg"
-                    src={videoURL}
-                    style={{ width: '100%', height: '550' }} // Fixed height
-                  />
-                ) : (
-                  <img
-                    src="https://sagclapp.com/preplearn_poster.jpg"
-                    alt="Poster"
-                    style={{ width: '100%', height: '550' }} // Fixed height to match ShakaPlayer
-                  />
-                )}
-
+                <Plyr
+                  ref={plyrRef}
+                  source={{
+                    type: 'video',
+                    sources: [{ src: videoURL, type: 'video/mp4' }],
+                    poster: require('../assets/images/poster2.jpg'), // Path to the poster image
+                  }}
+                  options={{
+                    controls: isLocked ? [] : [ // Hide controls when locked
+                      'play-large',
+                      'restart',
+                      'rewind',
+                      'play',
+                      'fast-forward',
+                      'progress',
+                      'current-time',
+                      'duration',
+                      'mute',
+                      'volume',
+                      'settings',
+                      'fullscreen',
+                    ],
+                  }}
+                  style={{ width: '100%', height: '550' }} // Fixed height
+                />
               </Grid>
 
             </Grid>
           </Paper>
         </Container>
+
       </main>
       <Dialog
         fullScreen={fullScreen}
@@ -869,4 +868,4 @@ function OnlineHomePage({ history }) {
 
   );
 }
-export default OnlineHomePage;
+export default FreeCoursePage;
