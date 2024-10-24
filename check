@@ -5,3 +5,41 @@ Splash changed
 abhishek@offline.melzo
 12345678
 Login page modified
+
+
+Sept 23,2024
+--------------
+1. Check page UI changed
+2. Content Protection Added in electron js
+3. Electron js modified
+
+
+
+# Old version code working in offline but not in online
+# Expiry Check - Working
+# Devide id Check multiple or exceeded - Working
+# App version Check - Working in offline not online
+# Enrollment no Check - Working
+# Class type missing in online version
+# Batch selection not working in both offline and online
+# Full screen not working in online
+#  Video list scroll missing
+# class duration not available in both on and offline
+# Add active video play
+# Scrolling issue in playlist
+# When video is playing then views shouldnt change on click rather we will add a modal there
+# Offline Anlytics is also saved in Auth count
+# Shuffle issue in playlist
+# Views are not getting updated from server even after log out
+
+
+Oct 15,2024
+------------
+# satish_feb for offline and satish_march for online
+# fixed the issue of input focus on login text input
+# sdb logic needs to be added on home page
+# Duration added in online
+# Remove base url from services so that we can change it later
+# Offline playlist serial changed on changing topics
+# issue in profile page while switching from profile to home page and online homepage
+# if i have changed views on server then its not taking affect even after logout or sync in offline

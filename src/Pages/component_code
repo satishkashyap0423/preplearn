@@ -1,0 +1,82 @@
+<Container component="main" maxWidth="xl">
+          <CssBaseline />
+          <Box
+            sx={{
+              marginTop: 8,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            <Avatar
+              sx={{ bgcolor: '#fed008' }}
+              className={classes.logo}
+              style={{
+                width: '200px',
+                marginBottom: '30px',
+                height: 'auto',
+                borderRadius: '0', // Remove circular shape
+              }}
+            >
+              <img
+                src={require('../assets/images/ic_launcher.png')}
+                alt="Logo"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            </Avatar>
+            <Typography component="h6" variant="h15">
+              Welcome to PREP LEARN, a leading provider of D2H classes of CA | CMA | CS | B.COM
+            </Typography>
+            <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+              <Grid container >
+                <Grid item xs={12}>
+                <CssTextField style={{ marginBottom: '20px', marginTop:50 }}
+                    required
+                    variant="outlined"
+                    fullWidth
+                    placeholder="Enter your Enrollment number"
+                    id="email"
+                    label="Enrollment Number"
+                    name="email"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <AccountCircle style={{ color: '#fed008' }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+              </Grid>
+              <ColorButton
+                type="submit"
+                fullWidth disableRipple disableElevation variant="contained" style={{marginTop:30}} color="primary" className={classes.margin}
+              >
+                LOGIN <Avatar alt="aswinibajaj" src={require('../assets/images/enter.png')} className={classes.small} style={{margin:10}}/>
+              </ColorButton>
+              {/* <Grid container justifyContent="flex-end">
+              <Grid item>
+                <Link href="#" variant="body2">
+                  Already have an account? Sign in
+                </Link>
+              </Grid>
+            </Grid> */}
+
+            </Box>
+          </Box>
+          {showAlert &&
+            <Alert severity={alertType}>
+              {message}
+            </Alert>
+          }
+          {showdownload ? <ExtraFileDownload
+            showdownload={showdownload}
+            CloseApplication={() => CloseApplication()}
+            enableButton={enableButton}
+          /> : null}
+          <Copyright sx={{ mt: 5 }} />
+        </Container>

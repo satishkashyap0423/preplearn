@@ -169,6 +169,10 @@ export default function OpenPdfFile({ history }) {
   const userData = JSON.parse(localStorage.getItem("userDetail"));
   const pdfurl = localStorage.getItem("noteurl") || ''; // Retrieve the URL from the location state
   console.log(pdfurl, history)
+  React.useEffect(() => {
+    document.getElementById('zmmtg-root').style.display = 'none'
+  })
+  
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
   }

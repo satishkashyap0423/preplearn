@@ -6,6 +6,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
+import {Typography } from '@material-ui/core';
 import Container from '@material-ui/core/Container';
 import Button from '@mui/material/Button';
 import Paper from '@material-ui/core/Paper';
@@ -19,6 +20,7 @@ import Grid from '@mui/material/Grid';
 import InputLabel from '@mui/material/InputLabel';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import FormControl from '@mui/material/FormControl';
+import BookIcon from '@mui/icons-material/Book'; // Import the Book icon
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -31,6 +33,10 @@ import Select from '@mui/material/Select';
 import { makeStyles, useTheme, emphasize, withStyles, fade } from '@material-ui/core/styles';
 import { Avatar, CircularProgress } from '@material-ui/core';
 import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import MyDrawer from "./MyDrawer";  // Adjust the path based on your file structure
+import { Tooltip } from '@mui/material';
 
 import clsx from 'clsx';
 import Plyr from 'plyr-react'
@@ -59,6 +65,17 @@ const StyledBreadcrumb = withStyles((theme) => ({
   },
 
 }))(Chip);
+const ColorButton3 = withStyles((theme) => ({
+  root: {
+    background: 'linear-gradient(45deg, #4492fc  30%, #26b2ee  90%)',
+    border: 0,
+    borderRadius: 3,
+    // boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+    color: 'white',
+    height: 48,
+    padding: '0 12px'
+  },
+}))(Button);
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
@@ -248,6 +265,24 @@ const useStyles = makeStyles((theme) => ({
 }));
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 let videoCountFile = `${homedir}/Downloads/videocounts.js`;
+let remark = [
+  {
+    key: 1,
+    name: "Regular Class",
+  },
+  {
+    key: 2,
+    name: "Exam Mentoring",
+  },
+  {
+    key: 3,
+    name: "Revision Lectures",
+  },
+  {
+    key: 4,
+    name: "Practice Lectures"
+  }
+]
 function OnlineHomePage({ history }) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -279,6 +314,7 @@ function OnlineHomePage({ history }) {
   const [isLocked, setIsLocked] = useState(true); // Player is locked by default
   const [CurrentTime, setCurrentTime] = useState(0)
   const [duration, setduration] = useState(0)
+  const [selectedRemark, setselectedRemark] = useState(remark[0])
   const classes = useStyles();
   const plyrRef = React.useRef(null)
   const videoRef = React.useRef(null);
@@ -300,14 +336,18 @@ function OnlineHomePage({ history }) {
     // setSelectedChatper(filterData[0])
   }
   const handleBatchChange = (event) => {
-    let topicBodydata = {
-      batchid: event.target.value.batchid,
-      chapterName: "Regular Class"
-    }
-    FetchInstance("POST", topicBodydata, "TopicList").then((topics) => {
-      setTopicsArray(topics.data)
-      setSelectedTopic(topics.data[0])
-    })
+    setselectedBatch(event.target.value)
+    setselectedRemark("")
+    // let topicBodydata = {
+
+    //   batchid: event.target.value.batchid,
+    //   chapterName: "Regular Class"
+    // }
+    // FetchInstance("POST", topicBodydata, "TopicList").then((topics) => {
+    //   setTopicsArray(topics.data)
+    //   setSelectedTopic(topics.data[0])
+    //   setselectedBatch
+    // })
   }
   const handleTopicChange = (event) => {
     setSelectedTopic(event.target.value);
@@ -328,7 +368,23 @@ function OnlineHomePage({ history }) {
 
   }
 
+  const handleRemarkChange = (event) => {
+    console.log(event.target.value.name)
+    setselectedRemark(event.target.value)
+    let topicBodydata = {
+      batchid: selectedBatch.batchid,
+      chapterName: event.target.value.name
+    }
+    FetchInstance("POST", topicBodydata, "TopicList").then((topics) => {
+      setTopicsArray(topics.data)
+      // setSelectedTopic(topics.data[0])
+      setVideosArray([])
+    })
+  }
 
+  React.useEffect(() => {
+    document.getElementById('zmmtg-root').style.display = 'none'
+  })
   React.useEffect(() => {
     const fetchData = async () => {
       try {
@@ -370,6 +426,7 @@ function OnlineHomePage({ history }) {
           if (!data.status) {
             setBatchesArray(data.data)
             setselectedBatch(data.data[0])
+            setselectedRemark(remark[0])
             let topicBodydata = {
               batchid: data.data[0].batchid,
               chapterName: "Regular Class"
@@ -476,7 +533,7 @@ function OnlineHomePage({ history }) {
 
     })
 
-    // setvideoURL("https://sagclapp.com/gpac/prepvideos/01IntroductionTo_IndAs/01IntroductionTo_IndAs.mpd")
+    // setvideoURL("https://craftifex.com/gpac/prepvideos/01IntroductionTo_IndAs/01IntroductionTo_IndAs.mpd")
 
   }
   const DecryptOfflineFile = (mydata) => new Promise((resolve, reject) => {
@@ -504,6 +561,7 @@ function OnlineHomePage({ history }) {
       //controlPanelElements:['rewind', 'fast_forward'],
       enableKeyboardPlaybackControls: true,
       addBigPlayButton: true,
+      
     };
     ui.configure(config);
 
@@ -537,93 +595,154 @@ function OnlineHomePage({ history }) {
       )}
       <AppBar
         position="fixed"
-        style={{ backgroundColor: '#FF0000', width: '100%', }}
+        style={{ backgroundColor: '#748785', width: '100%', }}
         className={clsx(classes.appBar, { [classes.appBarShift]: open })}
       >
         <Toolbar
-          variant="dense"
-          style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            <Avatar
-              variant="rounded"
-              src={require('../assets/images/ic_launcher.png')}
-              style={{ marginRight: 10 }}
-              className={classes.rounded}
-            />
-            <Breadcrumbs aria-label="breadcrumb">
-              <StyledBreadcrumb
-                component="button"
-                style={{ backgroundColor: '#ffff' }}
-                label={userData.fullname}
-                icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
-              />
-            </Breadcrumbs>
-          </div>
-          <div className={classes.search} style={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton style={{ color: 'white' }} onClick={() => history.push('OnlineFreeCoursePage')}>
-              <h1 style={{
-                fontSize: 12
-              }}>Free course</h1>
-            </IconButton>
-            <IconButton style={{ color: 'white' }} onClick={() => Profile()}>
-              <AccountCircle />
-            </IconButton>
-            <IconButton style={{ color: 'white' }} onClick={() => Logout()}>
-              <ExitToAppIcon />
-            </IconButton>
-            <IconButton style={{ color: 'white' }} onClick={() => MinimizeApp()}>
-              <Minimize />
-            </IconButton>
-            <IconButton style={{ color: 'white' }} onClick={() => CloseApp()}>
-              <Cancel />
-            </IconButton>
+                    variant="dense"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0 16px', // Add padding for better spacing
+                      backgroundColor: '#282c34', // Example background color
+                    }}
+                  >
+                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                    <MyDrawer />
+                      {/* <Avatar
+                        variant="rounded"
+                        src={require('../assets/images/ic_launcher.png')}
+                        style={{ marginRight: 10 }}
+                        className={classes.rounded}
+                      /> */}
+                      <Breadcrumbs aria-label="breadcrumb">
+                        <StyledBreadcrumb
+                          component="button"
+                          style={{
+                            backgroundColor: '#ffffff',
+                            margin: '0 4px', // Add margin for spacing
+                            cursor: 'pointer', // Show pointer on hover
+                            borderRadius: 4, // Rounded corners for the button
+                          }}
+                          label={userData.fullname}
+                          icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
+                        />
+                      </Breadcrumbs>
+                    </div>
 
-          </div>
-        </Toolbar>
+                    <div className={classes.search} style={{ display: 'flex', alignItems: 'center' }}>
+                    <Tooltip title="Zoom Classes" placement="bottom"> 
+
+                      <IconButton style={{ color: 'white' }} onClick={() => history.push('OnlineZoomPage')}>
+                        
+                      <Avatar
+                        alt="Zoom"
+                        src={require('../assets/images/zoom.png')}
+                        style={{ width: 24, height: 24, margin: 5 }} // Set width and height for smaller size
+                          />
+                      <span style={{ fontSize: 12 }}>Zoom</span>
+                      </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Free Course" placement="bottom"> 
+
+                      <IconButton onClick={() => history.push('OnlineFreeCoursePage')} style={{ color: 'white', display: 'flex', alignItems: 'center' }}>
+                          <BookIcon fontSize="small" style={{ marginRight: 4 }} /> {/* Added Book icon */}
+                          <span style={{ fontSize: 12 }}>Free course</span>
+                        </IconButton>
+
+                      {/* <IconButton style={{ color: 'white' }} onClick={() => Profile()}>
+                        <AccountCircle fontSize="small" />
+                      </IconButton> */}
+                       </Tooltip>
+                       <Tooltip title="Logout" placement="bottom"> 
+                      <IconButton style={{ color: 'white' }} onClick={() => Logout()}>
+                        <ExitToAppIcon fontSize="small" />
+                      </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Minimize" placement="bottom"> 
+                      <IconButton style={{ color: 'white' }} onClick={() => MinimizeApp()}>
+                        <Minimize fontSize="small" />
+                      </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Close App" placement="bottom"> 
+                      <IconButton style={{ color: 'white' }} onClick={() => CloseApp()}>
+                        <Cancel fontSize="small" />
+                      </IconButton>
+                      </Tooltip>
+                    </div>
+                </Toolbar>
+
       </AppBar>
-      <main className={classes.content}>
-        <Container maxWidth="xl" style={{ marginTop: 5 }}>
+      <main
+        className={classes.content}
+        style={{
+          marginTop: 5,
+          backgroundColor: '#fff',
+          minHeight: '100vh', // Minimum height of full viewport
+          display: 'flex',    // Flexbox layout for responsiveness
+          flexDirection: 'column',  // Stack content vertically
+        }}
+      >
+        <Container
+          maxWidth="xl"
+          sx={{
+            mt: 5,  // Margin top
+            flex: 1,  // Allow content to grow and fill the space
+            px: 2,   // Default padding for smaller screens (equivalent to 16px)
+            // Breakpoints for larger screens
+            [theme.breakpoints.up('sm')]: {
+              px: 3, // Increase padding to 24px for small and larger screens
+            },
+            [theme.breakpoints.up('md')]: {
+              px: 4, // Increase padding to 32px for medium and larger screens
+            },
+          }}
+        >
           <Grid container spacing={2} style={{ marginTop: 5 }}>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="class-select-label">Course</InputLabel>
-                <Select
-                  labelId="class-select-label"
-                  id="class-select"
-                  value={selectedCourse}
-                  label="Class"
-                  onChange={handleCourseChange}
-                >
-                  {courseArray.map((item) =>
-                    <MenuItem key={item.courseid} value={item}>
-                      {item.coursename}
-                    </MenuItem>
-                  )}
-                </Select>
-              </FormControl>
+            <Grid item xs={6} style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center'
+            }}>
+              <Grid item xs>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="class-select-label">Course</InputLabel>
+                  <Select
+                    labelId="class-select-label"
+                    id="class-select"
+                    value={selectedCourse}
+                    label="Class"
+                    onChange={handleCourseChange}
+                  >
+                    {courseArray.map((item) =>
+                      <MenuItem key={item.courseid} value={item}>
+                        {item.coursename}
+                      </MenuItem>
+                    )}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="subject-select-label">Level</InputLabel>
+                  <Select
+                    labelId="subject-select-label"
+                    id="subject-select"
+                    value={selectedLevel}
+                    label="Subject"
+                    onChange={handleLevelChange}
+                  >
+                    {LevelArray?.map((item) => (
+                      <MenuItem key={item.subjectName} value={item}>
+                        <em>{item.levelname}</em>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="subject-select-label">Level</InputLabel>
-                <Select
-                  labelId="subject-select-label"
-                  id="subject-select"
-                  value={selectedLevel}
-                  label="Subject"
-                  onChange={handleLevelChange}
-                >
-                  {LevelArray?.map((item) => (
-                    <MenuItem key={item.subjectName} value={item}>
-                      <em>{item.levelname}</em>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-          </Grid>
-          <Grid container spacing={2} style={{ marginTop: 5 }}>
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
                 <InputLabel id="class-select-label">Batch</InputLabel>
@@ -639,6 +758,29 @@ function OnlineHomePage({ history }) {
                       {item.batchname}
                     </MenuItem>
                   )}
+                </Select>
+              </FormControl>
+            </Grid>
+
+          </Grid>
+          <Grid container spacing={2} style={{ marginTop: 5 }}>
+            <Grid item xs={6}>
+
+              <FormControl fullWidth size="small">
+                <InputLabel id="subject-select-label">Class Type</InputLabel>
+                <Select
+                  labelId="subject-select-label"
+                  id="subject-select"
+                  value={selectedRemark}
+                  label="Class Type"
+                  onChange={handleRemarkChange}
+                >
+                  {remark?.map((item) => (
+                    <MenuItem key={item.key} value={item}>
+                      <em>{item.name}</em>
+                    </MenuItem>
+                  ))}
+
                 </Select>
               </FormControl>
             </Grid>
@@ -702,7 +844,7 @@ function OnlineHomePage({ history }) {
               />
 
             </Breadcrumbs>
-            {SelectedTopic.notes == 1 &&
+            {SelectedTopic?.notes == 1 &&
               <IconButton onClick={() => getNotes()}>
                 <NoteIcon fontSize="small" style={{ color: '#f1c40f' }} />
               </IconButton>
@@ -710,37 +852,53 @@ function OnlineHomePage({ history }) {
           </Paper>
 
 
-          <Paper elevation={3} variant="outlined" style={{ marginTop: 15 }}>
-            <Grid container spacing={2} >
-              <Grid item xs={4} justifyContent='center' spacing={3} style={{ marginTop: 3 }}>
-                <div style={{
-                  maxHeight: 'auto',
-                  overflowY: 'auto',
-                  scrollbarWidth: 'thin', /* For Firefox */
-                  scrollbarColor: '#888 #f5f5f5' /* For Firefox */
-                }}>
-                  <div style={{
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'flex-end'
-                  }}>
-                  </div>
+          <Paper elevation={3} variant="outlined" style={{ marginTop: 15, padding: '16px' }}>
+            <Grid container spacing={2}>
+              {/* Left Grid (Video List) */}
+              <Grid
+                item
+                xs={12} sm={4} // Full width on mobile, 4/12 on small screens and up
+                sx={{
+                  marginTop: 3,
+                  paddingRight: { xs: 0, sm: '16px' }, // Add padding for spacing on larger screens
+                }}
+              >
+                <div
+                  style={{
+                    maxHeight: '550px', // Set fixed height for scrollable area
+                    overflowY: 'auto',  // Enable vertical scrolling
+                    scrollbarWidth: 'thin', // For Firefox
+                    scrollbarColor: '#888 #f5f5f5', // Firefox scrollbar color
+                    paddingRight: '8px', // Padding to avoid scrollbar overlapping content
+                  }}
+                >
                   <List>
                     {VideosArray.map((sectionId, index) => (
-                      <div key={`item-${sectionId}`} style={{ marginBottom: '15px', padding: '3px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+                      <div
+                        key={`item-${sectionId}`}
+                        style={{
+                          marginBottom: '15px',
+                          padding: '3px',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                          cursor: 'pointer'
+                        }}
+                      >
                         <ListItem
                           button
                           onClick={async () => {
-                            if (sectionId.count >= parseInt(sectionId.videowatchlimit)) {
-                              // open dialog
-                              setopenError(true)
-                              return
+                            if(activeIndex !== index){
+                              if (sectionId.count >= parseInt(sectionId.videowatchlimit)) {
+                                setopenError(true);
+                                return;
+                              }
+                              await PlayVideo(sectionId, index);
+                              setactiveIndex(index)
+                              setIsLocked(false);
                             }
-                            await PlayVideo(sectionId, index);
-                            setIsLocked(false); // Unlock the player after decryption
+                            
                           }}
-                          style={{
+                          sx={{
                             border: '1px solid #ddd',
                             borderRadius: '8px',
                             backgroundColor: '#fff',
@@ -758,33 +916,68 @@ function OnlineHomePage({ history }) {
                               style={{
                                 backgroundColor: '#fff', // Background color of Avatar
                                 borderRadius: '50%', // Ensures circular Avatar
-                                width: 48, // Size of Avatar
-                                height: 48, // Size of Avatar
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)', // Optional shadow for Avatar
+                                width: 40, // Size of Avatar
+                                height: 40, // Size of Avatar
                               }}
                             >
                               <OndemandVideoIcon
-                                style={{
-                                  color: index === activeIndex ? '#008000' : '#efa112', // Color of the icon
-                                  fontSize: 32, // Size of the icon
+                                sx={{
+                                  color: index === activeIndex ? '#008000' : '#fed008',
+                                  fontSize: 32,
                                 }}
                               />
                             </Avatar>
                           </ListItemAvatar>
+                          
                           <ListItemText
                             primary={`${sectionId.videos}`}
-                            primaryTypographyProps={{ fontWeight: '500', fontSize: '1rem' }}
-                            secondary={`views ${sectionId.watchcount ? sectionId.watchcount : ""}`}
+                            primaryTypographyProps={{ fontWeight: 500, fontSize: '1rem' }}
+                            secondary={
+                              <React.Fragment>
+                                <Box
+                                  display="flex"
+                                  justifyContent="space-between"
+                                  alignItems="center"
+                                  sx={{
+                                    mt: 1,
+                                    p: 0.5, // Further reduced padding for a lower height
+                                    borderRadius: 2,
+                                    backgroundColor: '#f5f8fa', // Light gray background
+                                    boxShadow: 1,
+                                  }}
+                                >
+                                  <Box display="flex" alignItems="center">
+                                    <VisibilityIcon sx={{ color: '#007BFF', fontSize: 18, mr: 0.25 }} /> {/* Slightly smaller icon */}
+                                    <Typography variant="caption" component="span" fontWeight="bold" color="#333" sx={{ mr: 0.25 }}>
+                                      Views:
+                                    </Typography>
+                                    <Typography variant="caption" component="span" sx={{ color: '#555' }}>
+                                      {sectionId.watchcount || "N/A"}
+                                    </Typography>
+                                  </Box>
+                                  <Box display="flex" alignItems="center">
+                                    <AccessTimeIcon sx={{ color: '#28A745', fontSize: 18, mr: 0.25 }} /> {/* Slightly smaller icon */}
+                                    <Typography variant="caption" component="span" fontWeight="bold" color="#333" sx={{ mr: 0.25 }}>
+                                      Duration:
+                                    </Typography>
+                                    <Typography variant="caption" component="span" sx={{ color: '#555' }}>
+                                      {sectionId.duration || "N/A"}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </React.Fragment>
+                              
+                            }
                           />
                         </ListItem>
                       </div>
                     ))}
                   </List>
-
                 </div>
+
+                {/* Custom Scrollbar Styles */}
                 <style>
                   {`
-          /* Custom Scrollbar Styles for WebKit-based Browsers */
           div::-webkit-scrollbar {
             width: 8px;
           }
@@ -792,7 +985,7 @@ function OnlineHomePage({ history }) {
             background: #f5f5f5;
           }
           div::-webkit-scrollbar-thumb {
-            background: #ee9254;
+            background: #fed008;
             border-radius: 4px;
           }
           div::-webkit-scrollbar-thumb:hover {
@@ -801,32 +994,40 @@ function OnlineHomePage({ history }) {
         `}
                 </style>
               </Grid>
-              <Grid item xs={8}>
+
+              {/* Right Grid (Video Player) */}
+              <Grid
+                item
+                xs={12} sm={8} // Full width on mobile, 8/12 on small screens and up
+                sx={{
+                  paddingLeft: { xs: 0, sm: '16px' }, // Add padding for spacing on larger screens
+                  paddingTop: { xs: '16px', sm: 0 },  // Add top padding on mobile for separation
+                }}
+              >
                 {videoURL !== "" ? (
                   <ShakaPlayer
                     ref={videoRef}
-                    id='videoid'
+                    id="videoid"
                     autoPlay
-                    onTimeUpdate={e => getseeking(e)}
+                    onTimeUpdate={(e) => getseeking(e)}
                     onLoadStart={(e) => LoadPlayer(e)}
-                    width={window.require('@electron/remote').getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds().width - 150}
-                    height={window.require('@electron/remote').getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds().height - 110}
-                    poster="https://sagclapp.com/preplearn_poster.jpg"
+                    width="100%" // Make player fill its container's width
+                    height={550} // Fixed height for player
+                    poster="https://craftifex.com/preplearn_poster.jpg"
                     src={videoURL}
-                    style={{ width: '100%', height: '550' }} // Fixed height
+                    //src="https://preplearn-mpd.s3.ap-south-1.amazonaws.com/01IntroductionTo_IndAs/01IntroductionTo_IndAs.mpd"
                   />
                 ) : (
                   <img
-                    src="https://sagclapp.com/preplearn_poster.jpg"
+                    src="https://craftifex.com/preplearn_poster.jpg"
                     alt="Poster"
-                    style={{ width: '100%', height: '550' }} // Fixed height to match ShakaPlayer
+                    style={{ width: '100%', height: '550px' }} // Fixed height to match ShakaPlayer
                   />
                 )}
-
               </Grid>
-
             </Grid>
           </Paper>
+
         </Container>
       </main>
       <Dialog

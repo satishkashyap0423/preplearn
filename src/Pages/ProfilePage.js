@@ -177,7 +177,9 @@ let profileDetails = JSON.parse(localStorage.getItem("userDetail"));
 export default function ProfilePage({ history }) {
   const classes = useStyles();
   const theme = useTheme();
-
+  React.useEffect(() => {
+    document.getElementById('zmmtg-root').style.display = 'none'
+  })
   const Logout = () => {
     localStorage.clear();
     history.push('/LoginPage')
@@ -202,47 +204,64 @@ export default function ProfilePage({ history }) {
         className={clsx(classes.appBar, { [classes.appBarShift]: open })}
       >
         <Toolbar
-          variant="dense"
-          style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            <Avatar
-              variant="rounded"
-              src={require('../assets/images/ic_launcher.png')}
-              style={{ marginRight: 10 }}
-              className={classes.rounded}
-            />
-            <Breadcrumbs aria-label="breadcrumb">
-              <StyledBreadcrumb
-                component="button"
-                onClick={() => profileDetails.systemstatus == 1 ? history.push('/OnlineHomePage') : history.push('/HomePage')}
-                style={{ backgroundColor: '#ffff' }}
-                label="Home"
-              // icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
-              />
-              <StyledBreadcrumb
-                component="button"
-                style={{ backgroundColor: '#ffff' }}
-                label="Profile"
-              // icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
-              />
-            </Breadcrumbs>
-          </div>
-          <div className={classes.search} style={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton color="inherit" onClick={() => Profile()}>
-              <AccountCircle />
-            </IconButton>
-            <IconButton color="inherit" onClick={() => Logout()}>
-              <ExitToAppIcon />
-            </IconButton>
-            <IconButton color="inherit" onClick={() => MinimizeApp()}>
-              <Minimize />
-            </IconButton>
-            <IconButton color="inherit" onClick={() => CloseApp()}>
-              <Cancel />
-            </IconButton>
-          </div>
-        </Toolbar>
+  variant="dense"
+  style={{
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '0 16px', // Add padding for better spacing
+    backgroundColor: '#282c34', // Example background color
+  }}
+>
+  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+    <Avatar
+      variant="rounded"
+      src={require('../assets/images/ic_launcher.png')}
+      style={{ marginRight: 10 }}
+      className={classes.rounded}
+    />
+    <Breadcrumbs aria-label="breadcrumb">
+      <StyledBreadcrumb
+        component="button"
+        onClick={() => profileDetails.systemstatus === 1 ? history.push('/OnlineHomePage') : history.push('/HomePage')}
+        style={{
+          backgroundColor: '#ffffff',
+          margin: '0 4px', // Add some margin
+          cursor: 'pointer', // Show pointer on hover
+          borderRadius: 4, // Rounded corners for the button
+        }}
+        label="Home"
+      />
+      <StyledBreadcrumb
+        component="button"
+        style={{
+          backgroundColor: '#ffffff',
+          margin: '0 4px',
+          cursor: 'pointer',
+          borderRadius: 4,
+        }}
+        label="Profile"
+      />
+    </Breadcrumbs>
+  </div>
+  
+  <div className={classes.search} style={{ display: 'flex', alignItems: 'center' }}>
+    <IconButton color="inherit" onClick={() => Profile()} style={{ marginLeft: 10 }}>
+      <AccountCircle fontSize="small" />
+    </IconButton>
+    <IconButton color="inherit" onClick={() => Logout()} style={{ marginLeft: 10 }}>
+      <ExitToAppIcon fontSize="small" />
+    </IconButton>
+    <IconButton color="inherit" onClick={() => MinimizeApp()} style={{ marginLeft: 10 }}>
+      <Minimize fontSize="small" />
+    </IconButton>
+    <IconButton color="inherit" onClick={() => CloseApp()} style={{ marginLeft: 10 }}>
+      <Cancel fontSize="small" />
+    </IconButton>
+  </div>
+</Toolbar>
+
       </AppBar>
 
       <main className={classes.content}>

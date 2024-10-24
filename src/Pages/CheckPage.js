@@ -3,7 +3,11 @@ import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 
 export default function CheckPage({history}) {
+  React.useEffect(() => {
+    document.getElementById('zmmtg-root').style.display = 'none'
+  })
     React.useEffect(() => {
+    // localStorage.clear()
         let teacherDetails = JSON.parse(localStorage.getItem("userDetail"));
         if(teacherDetails!=null && teacherDetails!=undefined){
             if(teacherDetails.systemstatus==1){
@@ -28,7 +32,7 @@ export default function CheckPage({history}) {
         // }, 3000);
     }, [])
   return (
-    <Stack sx={{ color: 'grey.500', height:'100vh', justifyContent:'center', alignItems:'center' }} spacing={2} direction="row">
+    <Stack sx={{ color: 'grey.500', height:'100vh', backgroundColor:'#fff', justifyContent:'center', alignItems:'center' }} spacing={2} direction="row">
       <CircularProgress color="success" />
     </Stack>
   );

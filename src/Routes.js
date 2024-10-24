@@ -9,10 +9,12 @@ import OnlineHomePage from './Pages/OnlineHomePage';
 import FreeCoursePage from './Pages/FreeCoursePage';
 import OfflineZoomPage from './Pages/OfflineZoomPage';
 import OnlineFreeCoursePage from './Pages/OnlineFreeCoursePage';
+import OnlineZoomPage from './Pages/OnlineZoomPage';
 const Routes = () => {
   return (
     <Switch>
       <Route path="/OnlineFreeCoursePage" component ={OnlineFreeCoursePage}/>
+      <Route path="/OnlineZoomPage" component ={OnlineZoomPage}/>
       <Route path="/OfflineZoomPage" component ={OfflineZoomPage}/>
       <Route path="/FreeCoursePage" component ={FreeCoursePage}/>
       <Route path="/OpenPdfFile" component ={OpenPdfFile}/>

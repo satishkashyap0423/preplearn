@@ -304,15 +304,15 @@ console.log(homedir.replaceAll("\\", "/"))
 
 //C:\Users\Designer
 let profileDetails = JSON.parse(localStorage.getItem("userDetail"));
-function OfflineZoomPage({ history }) {
+function OnlineZoomPage({ history }) {
   //console.log(`file:///${drivepath}/AppData/Local/Programs/preplearn/resources/app.asar/build/index.html#/HomePage`)
   var signatureEndpoint = 'https://craftifex.com/preplearn/zoomeeting'
   // This Sample App has been updated to use SDK App type credentials https://marketplace.zoom.us/docs/guides/build/sdk-app
   var sdkKey = '2eHXwRi2fHjsyAnvRi1P24IToGtenWHNGDTK'
   var meetingNumber = '9400493185'
   var role = 0
-  var leaveUrl = 'http://localhost:3000'
-  //var leaveUrl = `file:///${drivepath}/AppData/Local/Programs/preplearn/resources/app.asar/build/index.html#/HomePage`
+  //var leaveUrl = 'http://localhost:3000'
+  var leaveUrl = `file:///${drivepath}/AppData/Local/Programs/preplearn/resources/app.asar/build/index.html#/HomePage`
   //var leaveUrl = "file:///Applications/preplearn.app/Contents/Resources/app.asar/build/index.html#/HomePage"
   var userName = JSON.parse(localStorage.getItem("userDetail")).fullname
   var userEmail = ''
@@ -323,6 +323,9 @@ function OfflineZoomPage({ history }) {
   // Webinars: https://marketplace.zoom.us/docs/sdk/native-sdks/web/client-view/webinars#join-registered
   var registrantToken = ''
   const classes = useStyles();
+  React.useEffect(() => {
+    document.getElementById('zmmtg-root').style.display = 'none'
+  })
   React.useEffect(() => {
     document.getElementById('zmmtg-root').style.display = 'none'
 
@@ -402,7 +405,7 @@ function OfflineZoomPage({ history }) {
       <CssBaseline />
       <AppBar
         position="fixed"
-        style={{ backgroundColor: '#585858', width: '100%' }}
+        style={{ backgroundColor: "#FF0000", width: '100%' }}
         className={clsx(classes.appBar, {
           [classes.appBarShift]: open,
         })}
@@ -414,7 +417,7 @@ function OfflineZoomPage({ history }) {
 
               <StyledBreadcrumb
                 component="button"
-                onClick={() => history.push('/HomePage')}
+                onClick={() => history.push('/OnlineHomePage')}
                 style={{ backgroundColor: '#ffff' }}
                 label="Home"
               // icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
@@ -442,4 +445,4 @@ function OfflineZoomPage({ history }) {
   )
 }
 
-export default OfflineZoomPage
+export default OnlineZoomPage

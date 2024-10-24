@@ -41,10 +41,19 @@ const DriveInfoDisk=({State,Message, getInfo, CancelModel})=>{
            }
         </DialogContent>
         <DialogActions>
-            <Button color="secondary" onClick={()=>CancelModel()}>
+            <Button color="secondary" onClick={()=>CancelModel()}
+              style={{ 
+                backgroundColor: '#e5e5e5', 
+                color: 'black',
+              }}>
               Cancel
             </Button>
-            <Button variant="contained" color="secondary" onClick={()=> getInfo(State.DataDisk[checked])}>
+            <Button variant="contained" color="secondary" onClick={()=> getInfo(State.DataDisk[checked])}
+              style={{ 
+                backgroundColor: '#fed008', 
+                color: 'black',
+              }}
+              >
               Ok
             </Button>
          </DialogActions>

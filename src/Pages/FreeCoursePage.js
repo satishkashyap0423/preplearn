@@ -13,6 +13,7 @@ import Minimize from '@material-ui/icons/RemoveCircle';
 import Cancel from '@material-ui/icons/CancelRounded';
 import MenuItem from '@mui/material/MenuItem';
 import Grid from '@mui/material/Grid';
+import { Tooltip } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import FormControl from '@mui/material/FormControl';
@@ -25,8 +26,9 @@ import useMediaQuery from '@material-ui/core/useMediaQuery';
 import NoteIcon from '@material-ui/icons/Note';
 import Chip from '@material-ui/core/Chip';
 import Select from '@mui/material/Select';
+import { FetchInstance } from '../Service/Services';
 import { makeStyles, useTheme, emphasize, withStyles, fade } from '@material-ui/core/styles';
-import { Avatar, CircularProgress } from '@material-ui/core';
+import { Avatar, CircularProgress, Typography } from '@material-ui/core';
 import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
@@ -293,17 +295,24 @@ function FreeCoursePage({ history }) {
   const [SelectedSubject, setSelectedSubject] = React.useState("")
   const [SelectedChatper, setSelectedChatper] = useState("")
   const [loading, setloading] = useState(false)
+  const [progressLoading, setprogressLoading] = useState(false)
+
   const [selectedRemark, setselectedRemark] = useState(remark[0])
+  const [logoutPopUP, setlogoutPopUP] = useState(false)
   const [open, setOpen] = React.useState(false);
   const [openError, setopenError] = useState(false)
   const [activeIndex, setactiveIndex] = useState(-1)
   const [isLocked, setIsLocked] = useState(true); // Player is locked by default
   const classes = useStyles();
   const plyrRef = React.useRef(null)
+  const [syncProgress, setsyncProgress] = React.useState(1);
   const userData = JSON.parse(localStorage.getItem("userDetail"));
   let local_free_toppics = JSON.parse(localStorage.getItem("AllFreeTopics"));
   let local_free_videos = JSON.parse(localStorage.getItem("AllFreeVideo"));
 
+  React.useEffect(() => {
+    document.getElementById('zmmtg-root').style.display = 'none'
+  })
   const handleTopicChange = (event) => {
     setSelectedTopic(event.target.value);
     console.log(local_free_videos)
@@ -510,9 +519,50 @@ function FreeCoursePage({ history }) {
   const Profile = () => {
     history.push('/ProfilePage')
   }
-  const Logout = () => {
-    localStorage.clear();
-    history.push('/LoginPage')
+  const Logout = async() => {
+    // before logout we have to sync all the data 
+    const exists = await fs.promises.access(videoCountFile).then(() => true).catch(() => false);
+    if (exists) {
+      const mydata = await fs.promises.readFile(videoCountFile);
+      let userVideoData = JSON.parse(mydata);
+      const totalVideos = userVideoData.length;
+      for (let i = 0; i < totalVideos; i++) {
+        const video = userVideoData[i];
+        let bodydata = {
+          userid: userData.userid,
+          videoid: video.id,
+          batchid: selectedBatch.batchid,
+          mode: 'offline',
+          currenttime: video.currenttime,
+          duration: video.duration,
+          counts: video.count
+        };
+        try {
+          const data = await FetchInstance("POST", bodydata, "Analysis_Access");
+          console.log(data);
+
+          // Calculate and display progress
+          const progressPercentage = Math.round(((i + 1) / totalVideos) * 100);
+          console.log(`Progress: ${progressPercentage}%`);
+          setsyncProgress(progressPercentage)
+          setprogressLoading(true);
+
+          if (i === totalVideos - 1) {
+            setTimeout(() => {
+              setprogressLoading(false);
+              setlogoutPopUP(false)
+              localStorage.clear();
+              history.push('/LoginPage')
+            }, 500);
+          }
+        } catch (error) {
+          console.error("Error in FetchInstance:", error);
+        }
+      }
+    } else {
+      console.log("There are no videos to sync");
+    }
+   
   }
   const MinimizeApp = () => {
     let windows = window.require('@electron/remote').getCurrentWindow();
@@ -567,6 +617,33 @@ function FreeCoursePage({ history }) {
     )
 
   }
+  function CircularProgressWithLabel(props) {
+    return (
+      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+        <CircularProgress variant="determinate" {...props} />
+        <Box
+          sx={{
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            position: 'absolute',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography
+            variant="caption"
+            component="div"
+            sx={{ color: 'text.secondary' }}
+          >
+            {`${Math.round(props.value)}%`}
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
   return (
     <div className={classes.root}>
       {loading && (
@@ -587,54 +664,114 @@ function FreeCoursePage({ history }) {
           <CircularProgress />
         </Box>
       )}
+       {progressLoading &&
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)', // Optional: To add a semi-transparent background
+            zIndex: 9999, // To make sure it is on top of other elements
+          }}
+        >
+          <CircularProgressWithLabel value={syncProgress} />
+
+        </Box>
+      }
       <AppBar
         position="fixed"
         style={{ backgroundColor: '#585858', width: '100%', }}
         className={clsx(classes.appBar, { [classes.appBarShift]: open })}
       >
-        <Toolbar
-          variant="dense"
-          style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            <Avatar
-              variant="rounded"
-              src={require('../assets/images/ic_launcher.png')}
-              style={{ marginRight: 10 }}
-              className={classes.rounded}
-            />
-            <Breadcrumbs aria-label="breadcrumb">
-              <StyledBreadcrumb
-                component="button"
-                onClick={() => userData.systemstatus == 1 ? history.push('/OnlineHomePage') : history.push('/HomePage')}
-                style={{ backgroundColor: '#ffff' }}
-                label="Home"
-                icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
-              />
-            </Breadcrumbs>
-          </div>
-          <div className={classes.search} style={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton style={{ color: 'white' }} onClick={() => Profile()}>
-              <AccountCircle />
-            </IconButton>
-            {/* <IconButton style={{ color: 'white' }} onClick={() => history.push('/EncryptedVideos')}>
-        <Settings />
-      </IconButton> */}
-            <IconButton style={{ color: 'white' }} onClick={() => Logout()}>
-              <ExitToAppIcon />
-            </IconButton>
-            <IconButton style={{ color: 'white' }} onClick={() => MinimizeApp()}>
-              <Minimize />
-            </IconButton>
-            <IconButton style={{ color: 'white' }} onClick={() => CloseApp()}>
-              <Cancel />
-            </IconButton>
-
-          </div>
+          <Toolbar
+                  variant="dense"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0 16px', // Add padding for better spacing
+                    backgroundColor: '#282c34', // Example background color
+                  }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                    {/* <Avatar
+                      variant="rounded"
+                      src={require('../assets/images/ic_launcher.png')}
+                      style={{ marginRight: 10 }}
+                      className={classes.rounded}
+                    /> */}
+                    <Breadcrumbs aria-label="breadcrumb">
+                    <Tooltip title="Home" placement="bottom">
+                      <StyledBreadcrumb
+                        component="button"
+                        onClick={() => userData.systemstatus === 1 ? history.push('/OnlineHomePage') : history.push('/HomePage')}
+                        style={{
+                          backgroundColor: '#ffffff',
+                          margin: '0 4px', // Add margin for spacing
+                          cursor: 'pointer', // Show pointer on hover
+                          borderRadius: 4, // Rounded corners for the button
+                        }}
+                        label="Home"
+                        icon={<VerifiedUserIcon fontSize="small" style={{ color: '#f94500' }} />}
+                      />
+                       </Tooltip>
+                    </Breadcrumbs>
+                  </div>
+                  
+                  <div className={classes.search} style={{ display: 'flex', alignItems: 'center' }}>
+                    {/* <IconButton onClick={() => Profile()} style={{ color: 'white', marginLeft: 10 }}>
+                      <AccountCircle fontSize="small" />
+                    </IconButton> */}
+                     <Tooltip title="Logout" placement="bottom">
+                    <IconButton onClick={() => setlogoutPopUP(true)} style={{ color: 'white', marginLeft: 10 }}>
+                      <ExitToAppIcon fontSize="small" />
+                    </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Minimize" placement="bottom"> 
+                    <IconButton onClick={() => MinimizeApp()} style={{ color: 'white', marginLeft: 10 }}>
+                      <Minimize fontSize="small" />
+                    </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Close App" placement="bottom"> 
+                    <IconButton onClick={() => CloseApp()} style={{ color: 'white', marginLeft: 10 }}>
+                      <Cancel fontSize="small" />
+                    </IconButton>
+                    </Tooltip>
+                  </div>
         </Toolbar>
+
       </AppBar>
-      <main className={classes.content}>
-        <Container maxWidth="xl" style={{ marginTop: 5 }}>
+      <main
+            className={classes.content}
+            style={{
+              marginTop: 5,
+              backgroundColor: '#fff',
+              minHeight: '100vh', // Minimum height of full viewport
+              display: 'flex',    // Flexbox layout for responsiveness
+              flexDirection: 'column',  // Stack content vertically
+            }}
+          >
+            <Container
+              maxWidth="xl"
+              sx={{
+                mt: 5,  // Margin top
+                flex: 1,  // Allow content to grow and fill the space
+                px: 2,   // Default padding for smaller screens (equivalent to 16px)
+                // Breakpoints for larger screens
+                [theme.breakpoints.up('sm')]: {
+                  px: 3, // Increase padding to 24px for small and larger screens
+                },
+                [theme.breakpoints.up('md')]: {
+                  px: 4, // Increase padding to 32px for medium and larger screens
+                },
+              }}
+            >
           <Grid container spacing={2} style={{ marginTop: 5 }}>
             <Grid item xs={12}>
               <FormControl fullWidth size="small">
@@ -722,7 +859,7 @@ function FreeCoursePage({ history }) {
                   </div>
                   <List>
                     {VideosArray.map((sectionId, index) => (
-                      <div key={`item-${sectionId}`} style={{ marginBottom: '15px', padding: '3px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+                      <div key={`item-${sectionId}`} style={{ cursor: 'pointer', marginBottom: '15px', padding: '3px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
                         <ListItem
                           button
                           onClick={async () => {
@@ -861,6 +998,27 @@ function FreeCoursePage({ history }) {
         <DialogActions>
           <Button onClick={handleErrorClose} color="primary" autoFocus>
             Okay
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        fullScreen={fullScreen}
+        open={logoutPopUP}
+        onClose={handleErrorClose}
+        aria-labelledby="responsive-dialog-title"
+      >
+        <DialogTitle id="responsive-dialog-title">{"Logout"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure want to logout?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={()=>Logout()} color="primary" autoFocus>
+            Logout
+          </Button>
+          <Button onClick={()=>setlogoutPopUP(false)} color="primary" autoFocus>
+            cancel
           </Button>
         </DialogActions>
       </Dialog>

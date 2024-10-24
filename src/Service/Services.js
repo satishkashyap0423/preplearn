@@ -2,13 +2,13 @@ import axios from "axios";
 
 export const FetchInstance = async(method, body, apiname) => {
     try {
-        let url = `https://sagclapp.com/preplearn/${apiname}`
-        //let url = `https://www.sagclapp.com/aswini/${apiname}`
+        //let url = `https://sagclapp.com/preplearn/${apiname}`
+        let url = `https://craftifex.com/preplearn/${apiname}`
         //let url = `https://sagc.in/preplearn_hybrid/${apiname}`
         
         // let url = `http://localhost:3008/${apiname}`
-        console.log(method, `https://sagclapp.com/preplearn/`, body, apiname);
-        //console.log(method, `https://www.sagclapp.com/aswini`, body, apiname);
+        //console.log(method, `https://sagclapp.com/preplearn/`, body, apiname);
+        console.log(method, `https://craftifex.com/preplearn`, body, apiname);
 
         const Data = await axios({method: method, url: url, data:body}).then(function (response) {
             console.log(response);
@@ -25,4 +25,4 @@ export const FetchInstance = async(method, body, apiname) => {
     } 
 }
 
-export const BASE_URL = "https://sagclapp.com/gpac/prepvideos/"
+export const BASE_URL = "https://craftifex.com/gpac/prepvideos/"

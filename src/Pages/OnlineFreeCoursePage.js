@@ -16,6 +16,8 @@ import Minimize from '@material-ui/icons/RemoveCircle';
 import Cancel from '@material-ui/icons/CancelRounded';
 import MenuItem from '@mui/material/MenuItem';
 import Grid from '@mui/material/Grid';
+import { Tooltip } from '@mui/material';
+
 import InputLabel from '@mui/material/InputLabel';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import FormControl from '@mui/material/FormControl';
@@ -327,6 +329,10 @@ function OnlineHomePage({ history }) {
 
 
   React.useEffect(() => {
+    document.getElementById('zmmtg-root').style.display = 'none'
+  })
+  
+  React.useEffect(() => {
     const fetchData = async () => {
       try {
         setVideosArray([]);
@@ -439,7 +445,7 @@ function OnlineHomePage({ history }) {
 
     })
 
-    // setvideoURL("https://sagclapp.com/gpac/prepvideos/01IntroductionTo_IndAs/01IntroductionTo_IndAs.mpd")
+    // setvideoURL("https://craftifex.com/gpac/prepvideos/01IntroductionTo_IndAs/01IntroductionTo_IndAs.mpd")
 
   }
   const DecryptOfflineFile = (mydata) => new Promise((resolve, reject) => {
@@ -498,56 +504,100 @@ function OnlineHomePage({ history }) {
           <CircularProgress />
         </Box>
       )}
-      <AppBar
+  <AppBar
         position="fixed"
-        style={{ backgroundColor: '#FF0000', width: '100%', }}
+        style={{ backgroundColor: '#585858', width: '100%', }}
         className={clsx(classes.appBar, { [classes.appBarShift]: open })}
       >
-        <Toolbar
-          variant="dense"
-          style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            <Avatar
-              variant="rounded"
-              src={require('../assets/images/ic_launcher.png')}
-              style={{ marginRight: 10 }}
-              className={classes.rounded}
-            />
-            <Breadcrumbs aria-label="breadcrumb">
-              <StyledBreadcrumb
-                onClick={() => userData.systemstatus == 1 ? history.push('/OnlineHomePage') : history.push('/HomePage')}
-                component="button"
-                style={{ backgroundColor: '#ffff' }}
-                label={"Home"}
-                icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
-              />
-            </Breadcrumbs>
-          </div>
-          <div className={classes.search} style={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton style={{ color: 'white' }} onClick={() => history.push('OnlineFreeCoursePage')}>
-              <h1 style={{
-                fontSize: 12
-              }}>Free course</h1>
-            </IconButton>
-            <IconButton style={{ color: 'white' }} onClick={() => Profile()}>
-              <AccountCircle />
-            </IconButton>
-            <IconButton style={{ color: 'white' }} onClick={() => Logout()}>
-              <ExitToAppIcon />
-            </IconButton>
-            <IconButton style={{ color: 'white' }} onClick={() => MinimizeApp()}>
-              <Minimize />
-            </IconButton>
-            <IconButton style={{ color: 'white' }} onClick={() => CloseApp()}>
-              <Cancel />
-            </IconButton>
+          <Toolbar
+                  variant="dense"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0 16px', // Add padding for better spacing
+                    backgroundColor: '#282c34', // Example background color
+                  }}
+                >
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                  {/* <Avatar
+                    variant="rounded"
+                    src={require('../assets/images/ic_launcher.png')}
+                    style={{ marginRight: 10 }}
+                    className={classes.rounded}
+                  /> */}
+                  <Breadcrumbs aria-label="breadcrumb">
+                  <Tooltip title="Home" placement="bottom">
+                    <StyledBreadcrumb
+                      onClick={() => userData.systemstatus === 1 ? history.push('/OnlineHomePage') : history.push('/HomePage')}
+                      component="button"
+                      style={{
+                        backgroundColor: '#ffffff',
+                        margin: '0 4px', // Add margin for spacing
+                        cursor: 'pointer', // Show pointer on hover
+                        borderRadius: 4, // Rounded corners for the button
+                      }}
+                      label={"Home"}
+                      icon={<VerifiedUserIcon fontSize="small" style={{ color: '#10d50d' }} />}
+                    />
+                     </Tooltip>
+                  </Breadcrumbs>
+                </div>
+                
+                <div className={classes.search} style={{ display: 'flex', alignItems: 'center' }}>
+                  {/* <IconButton style={{ color: 'white' }} onClick={() => history.push('OnlineFreeCoursePage')}>
+                    <span style={{ fontSize: 12 }}>Free course</span> 
+                  </IconButton> */}
+                  
+                  {/* <IconButton style={{ color: 'white' }} onClick={() => Profile()}>
+                    <AccountCircle fontSize="small" />
+                  </IconButton> */}
+                   <Tooltip title="Logout" placement="bottom">
+                  <IconButton style={{ color: 'white' }} onClick={() => Logout()}>
+                    <ExitToAppIcon fontSize="small" />
+                  </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Minimize" placement="bottom"> 
 
-          </div>
-        </Toolbar>
+                  <IconButton style={{ color: 'white' }} onClick={() => MinimizeApp()}>
+                    <Minimize fontSize="small" />
+                  </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Close App" placement="bottom"> 
+                  <IconButton style={{ color: 'white' }} onClick={() => CloseApp()}>
+                    <Cancel fontSize="small" />
+                  </IconButton>
+                  </Tooltip>
+                </div>
+</Toolbar>
+
       </AppBar>
-      <main className={classes.content}>
-        <Container maxWidth="xl" style={{ marginTop: 5 }}>
+      <main
+            className={classes.content}
+            style={{
+              marginTop: 5,
+              backgroundColor: '#fff',
+              minHeight: '100vh', // Minimum height of full viewport
+              display: 'flex',    // Flexbox layout for responsiveness
+              flexDirection: 'column',  // Stack content vertically
+            }}
+          >
+            <Container
+              maxWidth="xl"
+              sx={{
+                mt: 5,  // Margin top
+                flex: 1,  // Allow content to grow and fill the space
+                px: 2,   // Default padding for smaller screens (equivalent to 16px)
+                // Breakpoints for larger screens
+                [theme.breakpoints.up('sm')]: {
+                  px: 3, // Increase padding to 24px for small and larger screens
+                },
+                [theme.breakpoints.up('md')]: {
+                  px: 4, // Increase padding to 32px for medium and larger screens
+                },
+              }}
+            >
           <Grid container spacing={2} style={{ marginTop: 5 }}>
             <Grid item xs={12}>
               <FormControl fullWidth size="small">
@@ -617,7 +667,7 @@ function OnlineHomePage({ history }) {
                   </div>
                   <List>
                     {VideosArray.map((sectionId, index) => (
-                      <div key={`item-${sectionId}`} style={{ marginBottom: '15px', padding: '3px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+                      <div key={`item-${sectionId}`} style={{ marginBottom: '15px', cursor: 'pointer', padding: '3px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
                         <ListItem
                           button
                           onClick={async () => {
@@ -700,13 +750,13 @@ function OnlineHomePage({ history }) {
                     onLoadStart={(e) => LoadPlayer(e)}
                     width={window.require('@electron/remote').getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds().width - 150}
                     height={window.require('@electron/remote').getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds().height - 110}
-                    poster="https://sagclapp.com/preplearn_poster.jpg"
+                    poster="https://craftifex.com/preplearn_poster.jpg"
                     src={videoURL}
                     style={{ width: '100%', height: '550' }} // Fixed height
                   />
                 ) : (
                   <img
-                    src="https://sagclapp.com/preplearn_poster.jpg"
+                    src="https://craftifex.com/preplearn_poster.jpg"
                     alt="Poster"
                     style={{ width: '100%', height: '550' }} // Fixed height to match ShakaPlayer
                   />

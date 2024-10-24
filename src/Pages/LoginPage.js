@@ -8,6 +8,11 @@ import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
+import SchoolIcon from '@mui/icons-material/School'; // Import a relevant icon
+import { Divider } from '@mui/material';
+
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for styling
 import {
   AppBar,
   Toolbar,
@@ -21,6 +26,7 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Alert from '@mui/material/Alert';
 const { ipcRenderer } = window.require('electron');
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import { FetchInstance } from '../Service/Services';
 import MinimizeIcon from '@material-ui/icons/Minimize';
 import CloseIcon from '@material-ui/icons/Close';
@@ -90,13 +96,13 @@ const useStyles = makeStyles((theme) => ({
   },
 
   logo: {
-    width: '200px',
+    width: '170px',
     height: 'auto',
     borderRadius: 0, // Remove circular shape
-    backgroundColor: 'transparent', // Remove grey background
+    backgroundColor: '#fed008', // Remove grey background
     '& img': {
-      width: '100%',
-      height: '100%',
+      width: '70%',
+      height: '70%',
       objectFit: 'cover',
     },
   },
@@ -111,6 +117,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  
   termsPrivacyLink: {
     cursor: 'pointer',
     color: 'blue',
@@ -126,34 +133,43 @@ const useStyles = makeStyles((theme) => ({
     marginTop: 'auto', // Align with the bottom
   },
 }));
+// Bright shades of yellow
+const startColor = '#f9c600'; // Rich yellow
+const endColor = '#fed008';   // Bright yellow
+
 const ColorButton = withStyles((theme) => ({
   root: {
-    background: 'linear-gradient(45deg, #ee9254  30%, #ee9254  90%)',
+    background: `linear-gradient(45deg, ${startColor} 30%, ${endColor} 90%)`, // Gradient from rich to bright yellow
     border: 0,
     borderRadius: 3,
-    color: 'white',
+    boxShadow: '0 3px 5px 2px rgba(252, 206, 8, 0.3)', // Adds a subtle shadow for depth
+    color: 'white', // Text color
     height: 48,
     padding: '0 30px',
-    marginTop: '20px'
+    transition: 'background 0.3s', // Smooth transition for hover
+    '&:hover': {
+      background: `linear-gradient(45deg, ${endColor} 30%, #fff700 90%)`, // Lighter yellow for hover
+    },
   },
 }))(Button);
+
 const CssTextField = withStyles({
   root: {
     '& label.Mui-focused': {
-      color: '#ee9254',
+      color: '#fed008',
     },
     '& .MuiInput-underline:after': {
-      borderBottomColor: '#ee9254',
+      borderBottomColor: '#fed008',
     },
     '& .MuiOutlinedInput-root': {
       '& fieldset': {
-        borderColor: '#ee9254',
+        borderColor: '#fed008',
       },
       '&:hover fieldset': {
-        borderColor: '#ee9254',
+        borderColor: '#fed008',
       },
       '&.Mui-focused fieldset': {
-        borderColor: '#ee9254',
+        borderColor: '#fed008',
       },
     },
   },
@@ -185,6 +201,7 @@ const handleTermsClick = () => {
 
 const defaultTheme = createTheme();
 let _request;
+
 export default function LoginPage({ history }) {
   const [showAlert, setShowAlert] = useState(false)
   const [message, setMessage] = useState("")
@@ -196,6 +213,11 @@ export default function LoginPage({ history }) {
   const [loading, setloading] = useState(false)
   const [DiskDrive, setDiskDrive] = useState({ Open: false, DataDisk: [], Message: 'IEC Please Choose Your Drive' });
   const classes = useStyles();
+
+
+  React.useEffect(() => {
+    document.getElementById('zmmtg-root').style.display = 'none';
+  }, [])
 
   React.useEffect(() => {
     console.log(ipcRenderer)
@@ -215,7 +237,7 @@ export default function LoginPage({ history }) {
     if (os.platform() !== 'darwin') {
       if (os.release().includes('10.0.2')) {
         //let url = 'https://razorpc.com/preplearn.sdb';
-        let url = 'https://sagclapp.com/preplearn.sdb';
+        let url = 'https://craftifex.com/preplearn.sdb';
         console.log(url)
         let homedir = os.homedir()
         console.log(homedir)
@@ -287,12 +309,9 @@ export default function LoginPage({ history }) {
       password: data.get('password'),
     });
     if (data.get('email') == "") {
-      setShowAlert(true)
-      setAlertType("error")
-      setTimeout(() => {
-        setShowAlert(false)
-      }, 1500);
-      setMessage("Please enter email")
+      toast.error("Please Enter your Enrollment no", {
+        autoClose: 1500,
+      });
       return false
     }
     // if (data.get('password') == "") {
@@ -341,13 +360,10 @@ export default function LoginPage({ history }) {
       }
       else {
         if (!data?.status) {
-          setShowAlert(true)
-          setAlertType("error")
-          setTimeout(() => {
-            setShowAlert(false)
-          }, 1500);
-          setMessage(data.message);
-          return false
+          toast.error(data.message, {
+            autoClose: 1500,
+          });
+          return false;
         }
 
         if (data.data.systemstatus === 0 || data.data.systemstatus === '0') {
@@ -360,19 +376,25 @@ export default function LoginPage({ history }) {
             });
           }
           else {
-            setShowAlert(true)
-            setAlertType("error")
-            setTimeout(() => {
-              setShowAlert(false)
-            }, 1500);
-            setMessage(`You are using an older version of App. Please contact technical desk +917596033310. Latest version of our App is ${data.data.appversion}`)
+            toast.warn(`You are using an outdated version of the app. Please contact our technical support at +917596033310 for assistance. The latest version is available for download. ${data.data.appversion}`, {
+              autoClose: 1500,
+            });
           }
+
 
         }
         else if (data.data.systemstatus === 1 || data.data.systemstatus === '1') {
           // it is for online not for offline user.
-          localStorage.setItem("userDetail", JSON.stringify(data.data));
-          history.push('/OnlineHomePage')
+          if (data.data.appversion === packageJson.version) {
+            localStorage.setItem("userDetail", JSON.stringify(data.data));
+            history.push('/OnlineHomePage')
+          }
+          else {
+            toast.warn(`You are using an outdated version of the app. Please contact our technical support at +917596033310 for assistance. The latest version is available for download. ${data.data.appversion}`, {
+              autoClose: 1500,
+            });
+          }
+
 
         }
       }
@@ -452,7 +474,6 @@ export default function LoginPage({ history }) {
       resolve(DataObect)
     }
   })
-
   const getInfo = async (driveinfo) => {
     setDiskDrive({ DataDisk: [], Open: false, Message: '' });
     setloading(true)
@@ -462,6 +483,8 @@ export default function LoginPage({ history }) {
     if (!fs.existsSync(path)) {
       fs.mkdirSync(path, { recursive: true });
       userDetail["drivePath"] = `${driveinfo.Drive}/preplearn`;
+      userDetail["loginTime"] = new Date().getTime();
+
       localStorage.setItem("userDetail", JSON.stringify(userDetail));
       // Wait while feetching User course detail, it takes few mintues.
       let getCourses = await FetchInstance("GET", "", "getAllCourse");
@@ -491,6 +514,7 @@ export default function LoginPage({ history }) {
     }
     else {
       userDetail["drivePath"] = `${driveinfo.Drive}/preplearn`;
+      userDetail["loginTime"] = new Date().getTime();
       localStorage.setItem("userDetail", JSON.stringify(userDetail))
       let getCourses = await FetchInstance("GET", "", "getAllCourse");
       let getLevels = await FetchInstance("GET", "", "getAllLevel");
@@ -508,7 +532,7 @@ export default function LoginPage({ history }) {
         localStorage.setItem("AllFreeTopics", JSON.stringify(getFreeTopics.data));
         localStorage.setItem("AllFreeVideo", JSON.stringify(getFreeVideos.data));
       }
-      
+
       localStorage.setItem("AllCourse", JSON.stringify(getCourses.data));
       localStorage.setItem("AllLevels", JSON.stringify(getLevels.data));
       localStorage.setItem("AllBatches", JSON.stringify(getBatches.data));
@@ -570,6 +594,7 @@ export default function LoginPage({ history }) {
             </IconButton>
           </Toolbar>
         </AppBar>
+
         <Container component="main" maxWidth="xl">
           <CssBaseline />
           <Box
@@ -580,83 +605,177 @@ export default function LoginPage({ history }) {
               alignItems: 'center',
             }}
           >
-            <Avatar
-              sx={{ bgcolor: '#fed008' }}
-              className={classes.logo}
-              style={{
-                width: '200px',
-                marginBottom: '30px',
-                height: 'auto',
-                borderRadius: '0', // Remove circular shape
+            <Box
+              sx={{
+                background: '#ffffff', // Set a white background for a clean look
+                padding: '40px 30px', // Ample padding for breathing space
+                borderRadius: '12px', // Soft rounded corners
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)', // Softer shadow for depth
+                textAlign: 'center',
+                marginBottom: 4,
+                transition: '0.3s', // Smooth transition for hover effect
+                '&:hover': {
+                  boxShadow: '0 8px 30px rgba(0, 0, 0, 0.2)', // Stronger shadow on hover
+                },
+                maxWidth: '500px', // Set a maximum width to ensure content doesn't stretch too far
+                width: '100%', // Ensure it takes full width in smaller screens
               }}
             >
-              <img
-                src={require('../assets/images/ic_launcher.png')}
-                alt="Logo"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                }}
-              />
-            </Avatar>
-            <Typography component="h6" variant="h15">
-              Welcome to PREP LEARN, a leading provider of D2H classes of CA | CMA | CS | B.COM
-            </Typography>
-            <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-              <Grid container>
-                <Grid item xs={12}>
-                  <CssTextField
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CssTextField
-                    required
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type="password"
-                    id="password"
-                    autoComplete="new-password"
-                  />
-                </Grid>
-              </Grid>
-              <ColorButton
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-              >
-                LogIn
-              </ColorButton>
-              {/* <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="#" variant="body2">
-                  Already have an account? Sign in
-                </Link>
-              </Grid>
-            </Grid> */}
+              <Box sx={{ marginBottom: 3 }}>
+                <img
+                  src={require('../assets/images/logo-big.jpg')} // Use the imported logo image
+                  alt="Prep Learn Logo" // Alt text for accessibility
+                  style={{
+                    width: '120px', // Set a width for the logo
+                    height: '120px', // Set height to match width for a perfect circle
+                    borderRadius: '50%', // Apply circular shape
+                    objectFit: 'cover', // Ensure the image covers the circle without distortion
+                    border: '4px solid #fed008', // Optional: Add border to enhance visibility
+                  }}
+                />
+              </Box>
 
+              <Typography
+                component="h1"
+                variant="h5" // Adjusted for a smaller size
+                sx={{
+                  fontWeight: 700, // Bold for emphasis
+                  color: '#333', // Darker text for contrast
+                  lineHeight: 1.3,
+                  mb: 1,
+                  letterSpacing: '0.5px', // Slightly increased letter spacing
+                }}
+              >
+                Welcome to PREPLEARN
+              </Typography>
+
+              <Typography
+                component="h2"
+                variant="subtitle1" // Using subtitle1 for subtitle styling
+                sx={{
+                  fontWeight: 400, // Regular weight for contrast
+                  color: '#555',
+                  marginTop: 1,
+                  lineHeight: 1.5,
+                  maxWidth: '90%', // Limit width for readability
+                  margin: '0 auto', // Center the subtitle
+                  fontStyle: 'italic', // Italics for a softer feel
+                }}
+              >
+                A leading provider of D2H classes for CA | CMA | CS | B.COM
+              </Typography>
+
+              <Box
+                sx={{
+                  marginTop: 4,
+                  color: '#666',
+                  fontSize: '1rem',
+                  textAlign: 'center', // Center align the tagline
+                  maxWidth: '90%', // Maximum width to keep it well-contained
+                  mx: 'auto', // Center horizontally
+                }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: 400, lineHeight: 1.6 }}>
+                  Join us for expert guidance and comprehensive learning!
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Form Section */}
+            <Box
+              component="form"
+              noValidate
+              onSubmit={handleSubmit}
+              sx={{
+                mt: 3,
+                width: '100%',
+                maxWidth: '500px', // Match the maxWidth of the top box
+              }}
+            >
+              <Grid container spacing={3}> {/* Add spacing between form items */}
+                <Grid item xs={12}>
+                <TextField
+      required
+      variant="outlined"
+      fullWidth
+      placeholder="Enter your Enrollment number"
+      id="email"
+      label="Enrollment Number"
+      name="email"
+      className={classes.customTextField} // Apply the class
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <AccountCircle style={{ color: '#fed008' }} />
+          </InputAdornment>
+        ),
+      }}
+    />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <ColorButton
+                    type="submit"
+                    fullWidth
+                    disableRipple
+                    disableElevation
+                    variant="contained"
+                    sx={{
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      backgroundColor: '#1976d2',
+                      '&:hover': {
+                        backgroundColor: '#155a9b',
+                      },
+                      color: '#fff',
+                      fontWeight: 'bold',
+                      fontSize: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                    color="primary"
+                  >
+                    LOGIN
+                    <Avatar
+                      alt="aswinibajaj"
+                      src={require('../assets/images/enter.png')}
+                      sx={{
+                        marginLeft: 1,
+                        width: 24,
+                        height: 24, // Ensure the avatar is small and aligned with the text
+                      }}
+                    />
+                  </ColorButton>
+                </Grid>
+              </Grid>
             </Box>
           </Box>
-          {showAlert &&
-            <Alert severity={alertType}>
-              {message}
-            </Alert>
-          }
-          {showdownload ? <ExtraFileDownload
-            showdownload={showdownload}
-            CloseApplication={() => CloseApplication()}
-            enableButton={enableButton}
-          /> : null}
+
+          <ToastContainer
+            position="bottom-center" // Change this to bottom-left or bottom-right as needed
+            autoClose={3000} // Optional: duration before the toast automatically closes
+            hideProgressBar={false} // Optional: to show/hide progress bar
+            closeOnClick
+            pauseOnHover
+            draggable
+            theme="light" // Optional: change theme to "dark" if needed
+          />
+
+          {showAlert && <Alert severity={alertType}>{message}</Alert>}
+
+          {showdownload ? (
+            <ExtraFileDownload
+              showdownload={showdownload}
+              CloseApplication={CloseApplication}
+              enableButton={enableButton}
+            />
+          ) : null}
+
           <Copyright sx={{ mt: 5 }} />
         </Container>
+
+
         <DriveInfoDisk State={DiskDrive} Message={DiskDrive.Message} Close={DiskDrive.Open} getInfo={(driveinfo) => getInfo(driveinfo)} CancelModel={() => CancelModel()} />
       </ThemeProvider>
     </div>
